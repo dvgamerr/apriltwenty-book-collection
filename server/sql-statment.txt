@@ -1,0 +1,198 @@
+-- 1. (ถ้ายังไม่มี) สร้างฐานข้อมูล
+-- CREATE DATABASE book_collection;
+-- \c book_collection;
+
+-- 2. สร้าง ENUM type สำหรับสถานะในตาราง User_Books
+DROP TYPE IF EXISTS book_status;
+CREATE TYPE book_status AS ENUM ('want_to_read', 'reading', 'read');
+
+-- 3. สร้าง trigger function สำหรับปรับปรุง updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+--------------------------------------------------
+-- สร้างตาราง (DDL) พร้อมความสัมพันธ์
+--------------------------------------------------
+
+-- ตาราง Users
+DROP TABLE IF EXISTS Users CASCADE;
+CREATE TABLE Users (
+    user_id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Trigger สำหรับตาราง Users
+CREATE TRIGGER update_users_updated_at
+BEFORE UPDATE ON Users
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- ตาราง User_Profile
+DROP TABLE IF EXISTS User_Profile CASCADE;
+CREATE TABLE User_Profile (
+    user_id INT PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    bio TEXT,
+    avatar_url VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- ตาราง Books
+DROP TABLE IF EXISTS Books CASCADE;
+CREATE TABLE Books (
+    book_id SERIAL PRIMARY KEY,
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
+    isbn VARCHAR(20) UNIQUE,
+    publisher VARCHAR(100),
+    published_year INT,
+    cover_url VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Trigger สำหรับตาราง Books
+CREATE TRIGGER update_books_updated_at
+BEFORE UPDATE ON Books
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- ตาราง Authors
+DROP TABLE IF EXISTS Authors CASCADE;
+CREATE TABLE Authors (
+    author_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    bio TEXT
+);
+
+-- ตาราง Categories (หมวดหมู่หลักและหมวดหมู่ย่อย)
+DROP TABLE IF EXISTS Categories CASCADE;
+CREATE TABLE Categories (
+    category_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    parent_category_id INT,
+    FOREIGN KEY (parent_category_id) REFERENCES Categories(category_id) ON DELETE SET NULL
+);
+
+-- ตาราง Book_Authors (เชื่อมระหว่าง Books กับ Authors แบบ Many-to-Many)
+DROP TABLE IF EXISTS Book_Authors CASCADE;
+CREATE TABLE Book_Authors (
+    book_id INT,
+    author_id INT,
+    PRIMARY KEY (book_id, author_id),
+    FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES Authors(author_id) ON DELETE CASCADE
+);
+
+-- ตาราง Book_Categories (เชื่อมระหว่าง Books กับ Categories แบบ Many-to-Many)
+DROP TABLE IF EXISTS Book_Categories CASCADE;
+CREATE TABLE Book_Categories (
+    book_id INT,
+    category_id INT,
+    PRIMARY KEY (book_id, category_id),
+    FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
+);
+
+-- ตาราง User_Books (หนังสือที่ผู้ใช้บันทึกไว้)
+DROP TABLE IF EXISTS User_Books CASCADE;
+CREATE TABLE User_Books (
+    user_book_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    book_id INT NOT NULL,
+    status book_status NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE
+);
+
+-- Trigger สำหรับตาราง User_Books
+CREATE TRIGGER update_user_books_updated_at
+BEFORE UPDATE ON User_Books
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- ตาราง Custom_Collections (คอลเลกชันหนังสือของผู้ใช้)
+DROP TABLE IF EXISTS Custom_Collections CASCADE;
+CREATE TABLE Custom_Collections (
+    collection_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- ตาราง Collection_Books (เชื่อมคอลเลกชันกับหนังสือ)
+DROP TABLE IF EXISTS Collection_Books CASCADE;
+CREATE TABLE Collection_Books (
+    collection_id INT NOT NULL,
+    book_id INT NOT NULL,
+    PRIMARY KEY (collection_id, book_id),
+    FOREIGN KEY (collection_id) REFERENCES Custom_Collections(collection_id) ON DELETE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE
+);
+
+-- ตาราง Reviews (รีวิวและคะแนนของหนังสือ)
+DROP TABLE IF EXISTS Reviews CASCADE;
+CREATE TABLE Reviews (
+    review_id SERIAL PRIMARY KEY,
+    book_id INT NOT NULL,
+    user_id INT NOT NULL,
+    rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+--------------------------------------------------
+-- เติมข้อมูลพื้นฐานในตาราง Categories (Seed Data)
+--------------------------------------------------
+
+-- หมวดหมู่หลัก
+INSERT INTO Categories (name, description, parent_category_id) VALUES
+('นิยาย', 'หนังสือนิยายที่มีเรื่องราวสมมุติและสร้างสรรค์', NULL),
+('สารคดี', 'หนังสือที่นำเสนอข้อมูลและความรู้ที่มีความเป็นจริง', NULL),
+('การศึกษา/วิชาการ', 'ตำรา เอกสารการสอน หรือผลงานวิจัย', NULL),
+('ศิลปะและวัฒนธรรม', 'หนังสือเกี่ยวกับศิลปะ ดนตรี ภาพยนตร์ และวัฒนธรรม', NULL),
+('ธุรกิจและการเงิน', 'หนังสือเกี่ยวกับการบริหาร การตลาด การลงทุน และเศรษฐกิจ', NULL),
+('เทคโนโลยีและวิทยาศาสตร์', 'หนังสือแนวเทคโนโลยี คอมพิวเตอร์ และงานวิจัยด้านวิทยาศาสตร์', NULL),
+('สุขภาพและจิตวิทยา', 'หนังสือให้ความรู้เกี่ยวกับสุขภาพและการพัฒนาจิตใจ', NULL);
+
+-- หมวดหมู่ย่อยสำหรับ 'นิยาย' (สมมุติว่า 'นิยาย' ได้รับ category_id = 1)
+INSERT INTO Categories (name, description, parent_category_id) VALUES
+('ดราม่า', 'นิยายแนวดราม่า เน้นความรู้สึกและความขัดแย้งในเรื่องราว', 1),
+('แฟนตาซี', 'นิยายแนวแฟนตาซี มีองค์ประกอบของเวทมนตร์และโลกสมมุติ', 1),
+('โรแมนติก', 'นิยายแนวโรแมนติก เน้นความสัมพันธ์และความรักในเรื่องราว', 1),
+('สืบสวน', 'นิยายแนวสืบสวน คลี่คลายปริศนาและคดีอาชญากรรม', 1);
+
+-- หมวดหมู่ย่อยสำหรับ 'สารคดี' (สมมุติว่า 'สารคดี' ได้รับ category_id = 2)
+INSERT INTO Categories (name, description, parent_category_id) VALUES
+('ประวัติศาสตร์', 'สารคดีด้านประวัติศาสตร์ในยุคต่างๆ และเหตุการณ์สำคัญ', 2),
+('สังคมวิทยา', 'หนังสือที่วิเคราะห์ปรากฏการณ์ของสังคมและพฤติกรรมมนุษย์', 2),
+('วิทยาศาสตร์ทั่วไป', 'สารคดีเกี่ยวกับแนวคิดและการค้นพบทางวิทยาศาสตร์', 2);
+
+-- หมวดหมู่ย่อยสำหรับ 'เทคโนโลยีและวิทยาศาสตร์' (สมมุติว่า 'เทคโนโลยีและวิทยาศาสตร์' ได้รับ category_id = 6)
+INSERT INTO Categories (name, description, parent_category_id) VALUES
+('โปรแกรมมิ่ง', 'หนังสือแนะนำการเขียนโปรแกรมและพัฒนาซอฟต์แวร์', 6),
+('นวัตกรรม', 'หนังสือเกี่ยวกับนวัตกรรมและเทคโนโลยีใหม่ ๆ ในยุคปัจจุบัน', 6);
+
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('The Hobbit', 'นิยายแฟนตาซีคลาสสิกเกี่ยวกับการผจญภัยของฮอบบิทที่ต้องเดินทางไปเผชิญหน้ากับมังกร', '978-0-618-00221-3', 'HarperCollins', 1937, 'https://example.com/the_hobbit.jpg'),
+('Sapiens: A Brief History of Humankind', 'สารคดีที่เล่าถึงประวัติศาสตร์ของมนุษย์ ตั้งแต่ยุคหินจนถึงยุคเทคโนโลยี', '978-0-06-231609-7', 'Harper', 2014, 'https://example.com/sapiens.jpg'),
+('Clean Code', 'หนังสือที่สอนแนวทางการเขียนโค้ดที่มีประสิทธิภาพและอ่านง่ายสำหรับนักพัฒนาซอฟต์แวร์', '978-0-13-235088-4', 'Prentice Hall', 2008, 'https://example.com/clean_code.jpg'),
+('The Psychology of Money', 'หนังสือสำรวจแนวคิดทางจิตวิทยาเกี่ยวกับเงิน และวิธีที่เราคิดเกี่ยวกับการเงิน', '978-0-857-22409-6', 'Harriman House', 2020, 'https://example.com/psychology_of_money.jpg'),
+('Harry Potter and the Philosopher''s Stone', 'ภาคแรกของซีรีส์แฮร์รี่ พอตเตอร์ ติดตามการผจญภัยในโรงเรียนเวทมนตร์ฮอกวอตส์', '978-0-7475-3269-9', 'Bloomsbury', 1997, 'https://example.com/harry_potter_1.jpg');
