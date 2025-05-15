@@ -196,3 +196,13 @@ INSERT INTO Books (title, description, isbn, publisher, published_year, cover_ur
 ('Clean Code', 'หนังสือที่สอนแนวทางการเขียนโค้ดที่มีประสิทธิภาพและอ่านง่ายสำหรับนักพัฒนาซอฟต์แวร์', '978-0-13-235088-4', 'Prentice Hall', 2008, 'https://example.com/clean_code.jpg'),
 ('The Psychology of Money', 'หนังสือสำรวจแนวคิดทางจิตวิทยาเกี่ยวกับเงิน และวิธีที่เราคิดเกี่ยวกับการเงิน', '978-0-857-22409-6', 'Harriman House', 2020, 'https://example.com/psychology_of_money.jpg'),
 ('Harry Potter and the Philosopher''s Stone', 'ภาคแรกของซีรีส์แฮร์รี่ พอตเตอร์ ติดตามการผจญภัยในโรงเรียนเวทมนตร์ฮอกวอตส์', '978-0-7475-3269-9', 'Bloomsbury', 1997, 'https://example.com/harry_potter_1.jpg');
+
+
+
+INSERT INTO authors (name) VALUES
+('J.K. Rowling'),
+('George Orwell'),
+('Isaac Asimov'),
+('Haruki Murakami'),
+('Agatha Christie'),
+('Stephen King');

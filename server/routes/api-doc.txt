@@ -1,0 +1,184 @@
+API Documentation: Book Collection Management System
+Base URL:
+https://api.bookcollection.com/v1
+
+
+
+1. Authentication
+POST /auth/login
+Description:
+ใช้สำหรับให้ผู้ใช้เข้าสู่ระบบและรับ token (เช่น JWT) สำหรับใช้เข้าถึง endpoint ที่ต้องการ authentication
+Request Body:
+{
+  "email": "user@example.com",
+  "password": "strongpassword123"
+}
+
+
+Responses:
+| Status Code | Description | Example Response | 
+| 200 OK | Authentication successful; ส่งข้อมูลผู้ใช้และ token | json { "user_id": 12, "username": "user123", "email": "user@example.com", "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }  | 
+| 400 Bad Request | Request body ไม่ครบถ้วนหรือรูปแบบผิด | json { "error": "Email and password are required" }  | 
+| 401 Unauthorized | ไม่ผ่านการตรวจสอบข้อมูล (email/password ไม่ถูกต้อง) | json { "error": "Invalid email or password" }  | 
+
+
+
+2. Users
+GET /users/{user_id}
+Description:
+ดึงข้อมูลโปรไฟล์ของผู้ใช้ตาม user_id
+Path Parameter:
+- user_id: รหัสผู้ใช้ที่ต้องการดึงข้อมูล
+Responses:
+| Status Code | Description | Example Response | 
+| 200 OK | ดึงข้อมูลโปรไฟล์ของผู้ใช้ได้สำเร็จ | json { "user_id": 12, "username": "user123", "email": "user@example.com", "profile": { "first_name": "Atchariya", "last_name": "Thongyu", "bio": "Developer & Book Lover", "avatar_url": "https://example.com/avatar.jpg" } }  | 
+| 404 Not Found | ไม่พบผู้ใช้ที่มี user_id ดังกล่าว | json { "error": "User not found" }  | 
+
+
+
+PATCH /users/{user_id}
+Description:
+อัปเดตข้อมูลโปรไฟล์ของผู้ใช้
+Path Parameter:
+- user_id
+Request Body:
+{
+  "first_name": "Atchariya",
+  "bio": "Love database optimization!"
+}
+
+
+Responses:
+| Status Code | Description | Example Response | 
+| 200 OK | อัปเดตข้อมูลโปรไฟล์สำเร็จ | json { "message": "Profile updated successfully" }  | 
+| 400 Bad Request | ข้อมูลที่ส่งมาไม่ถูกต้องหรือไม่ครบถ้วน | json { "error": "Invalid profile data" }  | 
+| 404 Not Found | ไม่พบผู้ใช้ที่มี user_idดังกล่าว | json { "error": "User not found" }  | 
+
+
+
+3. Books
+GET /books
+Description:
+ดึงรายการหนังสือทั้งหมดในระบบ
+Responses:
+| Status Code | Description | Example Response | 
+| 200 OK | ดึงรายการหนังสือได้สำเร็จ | json [ { "book_id": 1, "title": "The Hobbit", "isbn": "978-0-618-00221-3", "publisher": "HarperCollins", "published_year": 1937, "cover_url": "https://example.com/the_hobbit.jpg" }, { "book_id": 2, "title": "Sapiens: A Brief History of Humankind", "isbn": "978-0-06-231609-7", "publisher": "Harper", "published_year": 2014, "cover_url": "https://example.com/sapiens.jpg" } ]  | 
+
+
+
+GET /books/{book_id}
+Description:
+ดึงรายละเอียดของหนังสือเฉพาะรายการตาม book_id
+Path Parameter:
+- book_id
+Responses:
+| Status Code | Description | Example Response | 
+| 200 OK | ดึงข้อมูลหนังสือได้สำเร็จ | json { "book_id": 1, "title": "The Hobbit", "description": "นิยายแฟนตาซีคลาสสิกเกี่ยวกับการผจญภัยของฮอบบิท...", "isbn": "978-0-618-00221-3", "publisher": "HarperCollins", "published_year": 1937, "cover_url": "https://example.com/the_hobbit.jpg", "authors": ["J.R.R. Tolkien"], "categories": ["นิยาย", "แฟนตาซี"] }  | 
+| 404 Not Found | ไม่พบหนังสือที่มี book_idดังกล่าว | json { "error": "Book not found" }  | 
+
+
+
+POST /books
+Description:
+เพิ่มหนังสือใหม่เข้าสู่ระบบ
+Request Body:
+{
+  "title": "Harry Potter and the Philosopher's Stone",
+  "description": "ภาคแรกของซีรีส์แฮร์รี่ พอตเตอร์...",
+  "isbn": "978-0-7475-3269-9",
+  "publisher": "Bloomsbury",
+  "published_year": 1997,
+  "cover_url": "https://example.com/harry_potter_1.jpg"
+}
+
+
+Responses:
+| Status Code | Description | Example Response | 
+| 201 Created | หนังสือถูกเพิ่มเข้าระบบสำเร็จ | json { "book_id": 5, "message": "Book added successfully" }  | 
+| 400 Bad Request | ข้อมูลหนังสือที่ส่งมาไม่ถูกต้องหรือไม่ครบถ้วน | json { "error": "Invalid book data" }  | 
+
+
+
+4. User Books (Saved Books)
+GET /users/{user_id}/saved-books
+Description:
+ดึงรายการหนังสือที่ผู้ใช้ได้บันทึกไว้ (saved books)
+Path Parameter:
+- user_id
+Responses:
+| Status Code | Description | Example Response | 
+| 200 OK | ดึงรายการหนังสือที่บันทึกไว้ได้สำเร็จ | json [ { "book_id": 1, "title": "The Hobbit", "status": "reading" }, { "book_id": 2, "title": "Sapiens: A Brief History of Humankind", "status": "want_to_read" } ]  | 
+| 404 Not Found | ไม่พบผู้ใช้ที่มี user_idดังกล่าว | json { "error": "User not found" }  | 
+
+
+
+POST /users/{user_id}/saved-books
+Description:
+เพิ่มหนังสือลงรายการที่ผู้ใช้บันทึกไว้
+Path Parameter:
+- user_id
+Request Body:
+{
+  "book_id": 1,
+  "status": "reading"
+}
+
+
+Responses:
+| Status Code | Description | Example Response | 
+| 201 Created | เพิ่มหนังสือเข้ารายการของผู้ใช้ได้สำเร็จ | json { "message": "Book added to your list" }  | 
+| 400 Bad Request | ข้อมูลที่ส่งมาไม่ครบถ้วนหรือข้อมูลไม่ถูกต้อง | json { "error": "Invalid data" }  | 
+| 404 Not Found | ไม่พบผู้ใช้หรือหนังสือที่มี ID ดังกล่าว | json { "error": "User or Book not found" }  | 
+
+
+
+5. Reviews
+GET /books/{book_id}/reviews
+Description:
+ดึงความคิดเห็น (reviews) ของหนังสือที่ระบุ
+Path Parameter:
+- book_id
+Responses:
+| Status Code | Description | Example Response | 
+| 200 OK | ดึงความคิดเห็นของหนังสือได้สำเร็จ | json [ { "review_id": 101, "user": "Atchariya", "rating": 5, "comment": "สุดยอดแฟนตาซี อ่านแล้ววางไม่ลง!" }, { "review_id": 102, "user": "John Doe", "rating": 4, "comment": "เนื้อเรื่องดีมาก" } ]  | 
+| 404 Not Found | ไม่พบหนังสือที่มี book_idดังกล่าว | json { "error": "Book not found" }  | 
+
+
+
+POST /books/{book_id}/reviews
+Description:
+เพิ่มความคิดเห็นและคะแนนให้กับหนังสือ
+Path Parameter:
+- book_id
+Request Body:
+{
+  "rating": 5,
+  "comment": "ชอบมากๆ เป็นเล่มโปรดของฉัน!"
+}
+
+
+Responses:
+| Status Code | Description | Example Response | 
+| 201 Created | รีวิวถูกบันทึกเข้าสู่ระบบเรียบร้อย | json { "message": "Review submitted successfully" }  | 
+| 400 Bad Request | ข้อมูลรีวิวที่ส่งมาไม่ถูกต้องหรือไม่ครบถ้วน | json { "error": "Invalid review data" }  | 
+| 404 Not Found | ไม่พบหนังสือที่มี book_idดังกล่าว | json { "error": "Book not found" }  | 
+
+
+
+Additional Notes:
+- Authentication:
+สำหรับ endpoint ที่ต้องการให้มีการตรวจสอบสิทธิ์ (เช่น POST, PATCH, การเพิ่ม saved-book, reviews) ควรส่ง header แบบ:
+Authorization: Bearer <token>
+- Content-Type:
+ทุก request ที่มี body ควรส่ง header:
+Content-Type: application/json
+- Error Handling:
+สิ่งที่ส่งกลับมาจาก server ควรมี key อย่างเช่น error หรือ message เพื่อให้ client สามารถนำไปแสดงหรือจัดการกับข้อผิดพลาดได้อย่างเหมาะสม
+- Response Codes:
+- 200 OK: สำหรับการดึงข้อมูลหรืออัปเดตที่ทำงานได้สำเร็จ
+- 201 Created: สำหรับการเพิ่มข้อมูลใหม่เข้าระบบ
+- 400 Bad Request: เมื่อข้อมูลที่ส่งมามีปัญหาหรือไม่ครบถ้วน
+- 401 Unauthorized: เมื่อการตรวจสอบสิทธิ์ล้มเหลว
+- 404 Not Found: เมื่อไม่พบ resource ที่ร้องขอ
+
+

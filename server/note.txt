@@ -1,0 +1,270 @@
+const express = require('express');
+const router = express.Router();
+const { Pool } = require('pg');
+
+// กำหนดการเชื่อมต่อฐานข้อมูลผ่าน Pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL, // หรือระบุ config อื่น ๆ ตามที่ต้องการ
+  // host, user, password, database, port ฯลฯ
+});
+
+// API: เพิ่มข้อมูลหนังสือพร้อมกับเชื่อมกับ author และ category ผ่าน join tables
+router.post('/books', async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    // ดึงข้อมูลจาก req.body ซึ่งคาดว่า client ส่งมาด้วย JSON object ที่มี key เหล่านี้
+    const {
+      title,
+      description,
+      isbn,
+      publisher,
+      published_year,
+      cover_url,
+      author_ids,   // Array ของ author_id ที่หนังสือเชื่อมต่อด้วย
+      category_ids  // Array ของ category_id ที่หนังสือเชื่อมต่อด้วย
+    } = req.body;
+    
+    // เริ่ม Transaction เพื่อให้แน่ใจว่าถ้า insert ใด insert หนึ่งล้มเหลว จะ rollback ทั้งหมด
+    await client.query('BEGIN');
+    
+    // Query เพิ่มข้อมูลหนังสือลงในตาราง books
+    const insertBookQuery = `
+      INSERT INTO books 
+        (title, description, isbn, publisher, published_year, cover_url, created_at, updated_at)
+      VALUES 
+        ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+      RETURNING book_id;
+    `;
+    const bookValues = [title, description, isbn, publisher, published_year, cover_url];
+    
+    const bookResult = await client.query(insertBookQuery, bookValues);
+    const bookId = bookResult.rows[0].book_id;
+    
+    // เชื่อมกับผู้แต่ง (authors) ผ่านตาราง book_authors
+    if (author_ids && Array.isArray(author_ids)) {
+      // Loop ผ่าน array ของ author_ids
+      for (const authorId of author_ids) {
+        const insertBookAuthorQuery = `
+          INSERT INTO book_authors (book_id, author_id)
+          VALUES ($1, $2);
+        `;
+        await client.query(insertBookAuthorQuery, [bookId, authorId]);
+      }
+    }
+    
+    // เชื่อมกับหมวดหมู่ (categories) ผ่านตาราง book_categories
+    if (category_ids && Array.isArray(category_ids)) {
+      for (const categoryId of category_ids) {
+        const insertBookCategoryQuery = `
+          INSERT INTO book_categories (book_id, category_id)
+          VALUES ($1, $2);
+        `;
+        await client.query(insertBookCategoryQuery, [bookId, categoryId]);
+      }
+    }
+    
+    // ถ้าทุกอย่างทำงานได้สำเร็จ ให้ commit transaction
+    await client.query('COMMIT');
+    
+    res.status(201).json({
+      success: true,
+      message: 'Book has been successfully created.',
+      book_id: bookId
+    });
+    
+  } catch (error) {
+    // ถ้ามี error เกิดขึ้น ให้ rollback transaction
+    await client.query('ROLLBACK');
+    console.error('Error while creating new book: ', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error. Please try again later.'
+    });
+  } finally {
+    client.release();
+  }
+});
+
+module.exports = router;
+
+
+
+
+------------------------------
+
+// import ไลบรารีและ instance ของ PrismaClient
+const express = require('express');
+const router = express.Router();
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+// API endpoint สำหรับเพิ่มหนังสือ
+router.post('/books', async (req, res) => {
+  try {
+    // ดึงข้อมูลที่ส่งมาจาก client (ในรูปแบบ JSON)
+    const {
+      title,
+      description,
+      isbn,
+      publisher,
+      published_year,
+      cover_url,
+      author_ids,   // คาดว่าเป็น Array เช่น [1, 2]
+      category_ids  // คาดว่าเป็น Array เช่น [3] หรือ [3, 4]
+    } = req.body;
+
+    // ใช้ Prisma ORM ในการสร้างหนังสือพร้อม nested writes
+    const newBook = await prisma.books.create({
+      data: {
+        title,
+        description,
+        isbn,
+        publisher,
+        published_year,
+        cover_url,
+        created_at: new Date(),
+        updated_at: new Date(),
+        // เชื่อมระบบกับตาราง book_authors
+        book_authors: {
+          create: author_ids?.map((authorId) => ({
+            authors: {
+              connect: { author_id: authorId },
+            },
+          })) || [],
+        },
+        // เชื่อมกับตาราง book_categories
+        book_categories: {
+          create: category_ids?.map((categoryId) => ({
+            categories: {
+              connect: { category_id: categoryId },
+            },
+          })) || [],
+        },
+      },
+      include: {
+        book_authors: {
+          include: { authors: true },
+        },
+        book_categories: {
+          include: { categories: true },
+        },
+      },
+    });
+
+    // ส่ง response ถ้าสร้างหนังสือสำเร็จ
+    res.status(201).json({
+      success: true,
+      message: 'Book has been successfully created.',
+      data: newBook,
+    });
+  } catch (error) {
+    console.error("Error creating book:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+});
+
+module.exports = router;
+
+
+----------------------
+book_authors: {
+    create: author_ids.map((authorNameFromClient) => ({
+        authors: {
+            connectOrCreate: {
+                where: { name: authorNameFromClient },
+                create: { name: authorNameFromClient }
+            }
+        }
+    }))
+},
+
+
+============================================================================
+routerBooks.post("/", async (req, res) => {
+  const { title, description, isbn, publisher, published_year, cover_url, author_ids, category_ids } = req.body;
+  
+  // Basic input validation (สามารถปรับให้ครอบคลุมมากขึ้น)
+  if (!title || !publisher || !published_year) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: title, publisher or published_year"
+    });
+  }
+  
+  try {
+    const result = await prisma.books.create({
+      data: {
+        title,
+        description,
+        isbn,
+        publisher,
+        published_year,
+        cover_url,
+        created_at: new Date(),
+        updated_at: new Date(),
+        // book_authors relation
+        book_authors: {
+          create: author_ids?.map((authorFromClient) => {
+            if (typeof authorFromClient === "number") {
+              return {
+                authors: {
+                  connect: { author_id: authorFromClient }
+                }
+              };
+            } else if (typeof authorFromClient === "string") {
+              return {
+                authors: {
+                  connectOrCreate: {
+                    where: { name: authorFromClient },
+                    create: { name: authorFromClient }
+                  }
+                }
+              };
+            }
+          }).filter(Boolean) || [],
+        },
+        // book_categories relation
+        book_categories: {
+          create: category_ids?.map((categoryFromClient) => {
+            if (typeof categoryFromClient === "number") {
+              return {
+                categories: {
+                  connect: { category_id: categoryFromClient }
+                }
+              };
+            } else if (typeof categoryFromClient === "string") {
+              return {
+                categories: {
+                  connectOrCreate: {
+                    where: { name: categoryFromClient },
+                    create: { name: categoryFromClient }
+                  }
+                }
+              };
+            }
+          }).filter(Boolean) || [],
+        }
+      },
+      include: {
+        book_authors: { include: { authors: true } },
+        book_categories: { include: { categories: true } }
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "add new book successfully",
+      newbook: result
+    });
+  } catch (error) {
+    console.error("Error in POST /books:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later."
+    });
+  }
+});
