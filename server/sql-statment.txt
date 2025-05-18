@@ -1,3 +1,9 @@
+***********************
+ลบของเก่า
+TRUNCATE TABLE book_categories, book_authors, books, categories, authors RESTART IDENTITY CASCADE;
+***********************
+
+
 -- 1. (ถ้ายังไม่มี) สร้างฐานข้อมูล
 -- CREATE DATABASE book_collection;
 -- \c book_collection;
@@ -161,7 +167,24 @@ CREATE TABLE Reviews (
 -- เติมข้อมูลพื้นฐานในตาราง Categories (Seed Data)
 --------------------------------------------------
 
--- หมวดหมู่หลัก
+//////////////////////////////////////
+-- 1. INSERT ตัวอย่างผู้แต่ง (Authors)
+-- หากยังไม่มีข้อมูลผู้แต่ง สามารถรันคำสั่งนี้เพื่อใส่ข้อมูลตัวอย่างได้
+INSERT INTO Authors (name) VALUES ('J.R.R. Tolkien');
+INSERT INTO Authors (name) VALUES ('Yuval Noah Harari');
+INSERT INTO Authors (name) VALUES ('Robert C. Martin');
+INSERT INTO Authors (name) VALUES ('Morgan Housel');
+INSERT INTO Authors (name) VALUES ('J.K. Rowling');
+INSERT INTO Authors (name) VALUES ('George Orwell');
+INSERT INTO Authors (name) VALUES ('Isaac Asimov');
+INSERT INTO Authors (name) VALUES ('Harper Lee');
+INSERT INTO Authors (name) VALUES ('Dan Brown');
+INSERT INTO Authors (name) VALUES ('Stephen Hawking');
+INSERT INTO Authors (name) VALUES ('Michelle Obama');
+INSERT INTO Authors (name) VALUES ('Eric Ries');
+INSERT INTO Authors (name) VALUES ('Paulo Coelho');
+INSERT INTO Authors (name) VALUES ('Walter Isaacson');
+
 INSERT INTO Categories (name, description, parent_category_id) VALUES
 ('นิยาย', 'หนังสือนิยายที่มีเรื่องราวสมมุติและสร้างสรรค์', NULL),
 ('สารคดี', 'หนังสือที่นำเสนอข้อมูลและความรู้ที่มีความเป็นจริง', NULL),
@@ -190,19 +213,84 @@ INSERT INTO Categories (name, description, parent_category_id) VALUES
 ('นวัตกรรม', 'หนังสือเกี่ยวกับนวัตกรรมและเทคโนโลยีใหม่ ๆ ในยุคปัจจุบัน', 6);
 
 
+-- 2. INSERT ตัวอย่างหนังสือ (Books)
+-- สมมุติว่า Book ID จะถูก generate โดยอัตโนมัติเป็นลำดับ 1 ถึง 15
 INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
-('The Hobbit', 'นิยายแฟนตาซีคลาสสิกเกี่ยวกับการผจญภัยของฮอบบิทที่ต้องเดินทางไปเผชิญหน้ากับมังกร', '978-0-618-00221-3', 'HarperCollins', 1937, 'https://example.com/the_hobbit.jpg'),
-('Sapiens: A Brief History of Humankind', 'สารคดีที่เล่าถึงประวัติศาสตร์ของมนุษย์ ตั้งแต่ยุคหินจนถึงยุคเทคโนโลยี', '978-0-06-231609-7', 'Harper', 2014, 'https://example.com/sapiens.jpg'),
-('Clean Code', 'หนังสือที่สอนแนวทางการเขียนโค้ดที่มีประสิทธิภาพและอ่านง่ายสำหรับนักพัฒนาซอฟต์แวร์', '978-0-13-235088-4', 'Prentice Hall', 2008, 'https://example.com/clean_code.jpg'),
-('The Psychology of Money', 'หนังสือสำรวจแนวคิดทางจิตวิทยาเกี่ยวกับเงิน และวิธีที่เราคิดเกี่ยวกับการเงิน', '978-0-857-22409-6', 'Harriman House', 2020, 'https://example.com/psychology_of_money.jpg'),
-('Harry Potter and the Philosopher''s Stone', 'ภาคแรกของซีรีส์แฮร์รี่ พอตเตอร์ ติดตามการผจญภัยในโรงเรียนเวทมนตร์ฮอกวอตส์', '978-0-7475-3269-9', 'Bloomsbury', 1997, 'https://example.com/harry_potter_1.jpg');
+('The Hobbit', 'A classic fantasy adventure about a hobbit on an unexpected journey.', '978-0-618-00221-3', 'HarperCollins', 1937, 'https://example.com/the_hobbit.jpg');
 
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('Sapiens: A Brief History of Humankind', 'A reflective documentary on the history of humankind.', '978-0-06-231609-7', 'Harper', 2014, 'https://example.com/sapiens.jpg');
 
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('Clean Code', 'A guide to writing clean, maintainable, and efficient code.', '978-0-13-235088-4', 'Prentice Hall', 2008, 'https://example.com/clean_code.jpg');
 
-INSERT INTO authors (name) VALUES
-('J.K. Rowling'),
-('George Orwell'),
-('Isaac Asimov'),
-('Haruki Murakami'),
-('Agatha Christie'),
-('Stephen King');
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('The Psychology of Money', 'An exploration of the psychological aspects of money and decision-making.', '978-0-857-22409-6', 'Harriman House', 2020, 'https://example.com/psychology_of_money.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('Harry Potter and the Philosopher''s Stone', 'The first installment of the Harry Potter series, introducing the magical world of Hogwarts.', '978-0-7475-3269-9', 'Bloomsbury', 1997, 'https://example.com/harry_potter_1.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('1984', 'A dystopian novel that delves into the dangers of totalitarianism and surveillance.', '978-0-452-28423-4', 'Secker & Warburg', 1949, 'https://example.com/1984.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('Animal Farm', 'A satirical allegory about the rise of totalitarian regimes.', '978-0-452-28424-1', 'Secker & Warburg', 1945, 'https://example.com/animal_farm.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('Foundation', 'A science fiction masterpiece about the fall and rise of civilizations in a galactic empire.', '978-0-553-80371-0', 'Gnome Press', 1951, 'https://example.com/foundation.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('To Kill a Mockingbird', 'A novel that explores the deep racial tensions in the American South.', '978-0-06-093546-7', 'J.B. Lippincott & Co.', 1960, 'https://example.com/to_kill_a_mockingbird.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('The Da Vinci Code', 'A mystery thriller that uncovers secret societies and hidden messages in art.', '978-0-385-50420-1', 'Doubleday', 2003, 'https://example.com/da_vinci_code.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('A Brief History of Time', 'An insightful journey into the origins and structure of the universe.', '978-0-553-17698-8', 'Bantam Books', 1988, 'https://example.com/brief_history_of_time.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('Becoming', 'A memoir by Michelle Obama detailing her personal experiences and growth.', '978-0-553-37542-7', 'Crown Publishing', 2018, 'https://example.com/becoming.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('The Lean Startup', 'A methodology for developing businesses and products that emphasizes continuous innovation.', '978-0-307-88789-4', 'Crown Business', 2011, 'https://example.com/lean_startup.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('The Alchemist', 'A philosophical novel about following your dreams and interpreting omens along the way.', '978-0-06-231500-7', 'HarperCollins', 1988, 'https://example.com/the_alchemist.jpg');
+
+INSERT INTO Books (title, description, isbn, publisher, published_year, cover_url) VALUES
+('Steve Jobs', 'An authorized biography of the co-founder of Apple, exploring his life and career.', '978-1-4516-4853-9', 'Simon & Schuster', 2011, 'https://example.com/steve_jobs.jpg');
+
+-- 3. เชื่อมความสัมพันธ์ระหว่างหนังสือและผู้แต่ง (book_authors)
+-- สมมุติว่า Books ที่แทรกเข้าไปมีรหัส (ID) ตั้งแต่ 1 ถึง 15 ตามลำดับการแทรก
+INSERT INTO book_authors (book_id, author_id) VALUES (1, 1);  -- The Hobbit โดย J.R.R. Tolkien
+INSERT INTO book_authors (book_id, author_id) VALUES (2, 2);  -- Sapiens โดย Yuval Noah Harari
+INSERT INTO book_authors (book_id, author_id) VALUES (3, 3);  -- Clean Code โดย Robert C. Martin
+INSERT INTO book_authors (book_id, author_id) VALUES (4, 4);  -- The Psychology of Money โดย Morgan Housel
+INSERT INTO book_authors (book_id, author_id) VALUES (5, 5);  -- Harry Potter โดย J.K. Rowling
+INSERT INTO book_authors (book_id, author_id) VALUES (6, 6);  -- 1984 โดย George Orwell
+INSERT INTO book_authors (book_id, author_id) VALUES (7, 6);  -- Animal Farm โดย George Orwell (ใช้ผู้แต่งเดียวกัน)
+INSERT INTO book_authors (book_id, author_id) VALUES (8, 7);  -- Foundation โดย Isaac Asimov
+INSERT INTO book_authors (book_id, author_id) VALUES (9, 8);  -- To Kill a Mockingbird โดย Harper Lee
+INSERT INTO book_authors (book_id, author_id) VALUES (10, 9); -- The Da Vinci Code โดย Dan Brown
+INSERT INTO book_authors (book_id, author_id) VALUES (11, 10); -- A Brief History of Time โดย Stephen Hawking
+INSERT INTO book_authors (book_id, author_id) VALUES (12, 11); -- Becoming โดย Michelle Obama
+INSERT INTO book_authors (book_id, author_id) VALUES (13, 12); -- The Lean Startup โดย Eric Ries
+INSERT INTO book_authors (book_id, author_id) VALUES (14, 13); -- The Alchemist โดย Paulo Coelho
+INSERT INTO book_authors (book_id, author_id) VALUES (15, 14); -- Steve Jobs โดย Walter Isaacson
+
+-- 4. เชื่อมความสัมพันธ์ระหว่างหนังสือและหมวดหมู่ (book_categories)
+INSERT INTO book_categories (book_id, category_id) VALUES (1, 9);   -- The Hobbit -> หมวด "แฟนตาซี" (นิยาย)
+INSERT INTO book_categories (book_id, category_id) VALUES (2, 12);  -- Sapiens -> หมวด "ประวัติศาสตร์" (สารคดี)
+INSERT INTO book_categories (book_id, category_id) VALUES (3, 15);  -- Clean Code -> หมวด "โปรแกรมมิ่ง" (เทคโนโลยีและวิทยาศาสตร์)
+INSERT INTO book_categories (book_id, category_id) VALUES (4, 5);   -- The Psychology of Money -> หมวด "ธุรกิจและการเงิน"
+INSERT INTO book_categories (book_id, category_id) VALUES (5, 9);   -- Harry Potter -> หมวด "แฟนตาซี" (นิยาย)
+INSERT INTO book_categories (book_id, category_id) VALUES (6, 8);   -- 1984 -> หมวด "ดราม่า" (นิยาย)
+INSERT INTO book_categories (book_id, category_id) VALUES (7, 8);   -- Animal Farm -> หมวด "ดราม่า" (นิยาย)
+INSERT INTO book_categories (book_id, category_id) VALUES (8, 16);  -- Foundation -> หมวด "นวัตกรรม" (เทคโนโลยีและวิทยาศาสตร์)
+INSERT INTO book_categories (book_id, category_id) VALUES (9, 8);   -- To Kill a Mockingbird -> หมวด "ดราม่า" (นิยาย)
+INSERT INTO book_categories (book_id, category_id) VALUES (10, 11); -- The Da Vinci Code -> หมวด "สืบสวน" (นิยาย)
+INSERT INTO book_categories (book_id, category_id) VALUES (11, 14); -- A Brief History of Time -> หมวด "วิทยาศาสตร์ทั่วไป" (สารคดี)
+INSERT INTO book_categories (book_id, category_id) VALUES (12, 13); -- Becoming -> หมวด "สังคมวิทยา" (สารคดี)
+INSERT INTO book_categories (book_id, category_id) VALUES (13, 5);  -- The Lean Startup -> หมวด "ธุรกิจและการเงิน"
+INSERT INTO book_categories (book_id, category_id) VALUES (14, 10); -- The Alchemist -> หมวด "โรแมนติก" (นิยาย)
+INSERT INTO book_categories (book_id, category_id) VALUES (15, 16); -- Steve Jobs -> หมวด "นวัตกรรม" (เทคโนโลยีและวิทยาศาสตร์)
