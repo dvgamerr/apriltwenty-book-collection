@@ -5,9 +5,9 @@ import { postBookValidation } from "../middleware/booksVadidation.js";
 const prisma = new PrismaClient;
 const routerBooks = Router();
 
-routerBooks.get("/:book_id", async (req, res) => {
+routerBooks.get("/:bookId", async (req, res) => {
     //1 access body and req
-    const bookIdFromClient = req.params.book_id;
+    const bookIdFromClient = req.params.bookId;
     const bookIdFromClientInt = parseInt(bookIdFromClient, 10);
     if (isNaN(bookIdFromClientInt)) {
         return res.status(400).json({
@@ -114,7 +114,6 @@ routerBooks.get("/", async(req, res) => {
     }
 
 })
-
 routerBooks.post("/", postBookValidation, async (req, res) => {
     //1 access req and body
     const { 
@@ -189,7 +188,7 @@ routerBooks.post("/", postBookValidation, async (req, res) => {
             }
         )
         //3 res section
-        return res.status(200).json({
+        return res.status(201).json({
             "success": true,
             "message": "add new book successfully",
             "newbook": result
@@ -203,4 +202,107 @@ routerBooks.post("/", postBookValidation, async (req, res) => {
     }
 
 })
+routerBooks.put("/:bookId", postBookValidation, async (req, res) => {
+    //1 access req
+    const bookIdFromClient = req.params.bookId;
+    const bookIdFromClientInt = parseInt(bookIdFromClient, 10);
+    const { 
+        title, 
+        description, 
+        isbn, 
+        publisher, 
+        published_year, 
+        cover_url, 
+        author_ids, 
+        category_ids 
+    } = req.body;
+    //2 sql
+    try {
+        const [ deleteAuthor, deleteCategory, updateBook ] = await prisma.$transaction([
+            prisma.book_authors.deleteMany({
+                where: { book_id: bookIdFromClientInt }
+            }),
+            prisma.book_categories.deleteMany({
+                where: { book_id: bookIdFromClientInt }
+            }),
+
+            prisma.books.update({
+                where: { book_id: bookIdFromClientInt },
+                data: {
+                    title,
+                    description,
+                    isbn,
+                    publisher,
+                    published_year,
+                    cover_url,
+                    updated_at: new Date(),
+                    book_authors: {
+                        create: author_ids?.map((authorFromClient) => {
+                            if (typeof authorFromClient === "number") {
+                                return {
+                                    authors: {
+                                        connect: { author_id: authorFromClient }
+                                    }
+                                }
+                            } else if (typeof authorFromClient === "string") {
+                                return {
+                                    authors: {
+                                        connectOrCreate: {
+                                            where: { name: authorFromClient },
+                                            create: { name: authorFromClient}
+                                        }
+                                    }
+                                }
+                            }
+                        }).filter(Boolean) || [],
+                    },
+                    book_categories: {
+                        create: category_ids?.map((categoryFromClient) => {
+                            if (typeof categoryFromClient === "number") {
+                                return {
+                                    categories: {
+                                        connect: { category_id: categoryFromClient }
+                                    }
+                                }
+                            } else if (typeof categoryFromClient === "string") {
+                                return {
+                                    categories: {
+                                        connectOrCreate: {
+                                            where: { name: categoryFromClient },
+                                            create: { name: categoryFromClient }
+                                        }
+                                    }
+                                }
+                            }
+                        }).filter(Boolean) || [],
+                    }
+                },
+                include: { 
+                    book_authors: { include: { authors: true }},
+                    book_categories: { include: { categories: true }}
+                }
+            })
+        ])
+
+        //3 res
+            if (!updateBook) {
+                return res.status(404).json({
+                    "success": false,
+                    "message": "Book not found"
+                });
+            }
+        return res.status(200).json({
+            "success": true,
+            "message": "update book data successfully",
+            "data": updateBook
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        })
+    }
+});
+
 export default routerBooks;
