@@ -1,5 +1,6 @@
 import express from "express";
 import routerBooks from "./routes/books.js";
+import routerAuthors from "./routes/authors.js";
 //import { PrismaClient } from "./generated/prisma/index.js"
 
 async function init() {
@@ -8,7 +9,8 @@ async function init() {
     //const prisma = new PrismaClient;
 
     app.use(express.json());
-    app.use("/books", routerBooks)
+    app.use("/books", routerBooks);
+    app.use("/authors", routerAuthors);
 
 
     app.listen(PORT, () => {
