@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { PrismaClient } from "../generated/prisma/index.js";
+//import { PrismaClient } from "../generated/prisma/index.js";
 import { postBookValidation } from "../middleware/booksValidation.js";
+import prisma from "../app.js";
 
-const prisma = new PrismaClient();
+//const prisma = new PrismaClient();
 const routerBooks = Router();
 
 routerBooks.get("/:bookId", async (req, res) => {

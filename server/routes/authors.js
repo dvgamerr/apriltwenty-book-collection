@@ -1,10 +1,8 @@
 import { Router } from "express";
-import { PrismaClient } from "../generated/prisma/index.js";
+import prisma from "../app.js";
 import { validateId } from "../middleware/validateData.js";
 
-
 const routerAuthors = Router();
-const prisma = new PrismaClient();
 
 routerAuthors.get("/:authorId", validateId("authorId"), async (req, res) => {
     //1 access request
@@ -30,7 +28,6 @@ routerAuthors.get("/:authorId", validateId("authorId"), async (req, res) => {
             "message": "Internal server error. Please try again later"
         });
     }
-
 })
 
 
