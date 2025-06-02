@@ -164,7 +164,6 @@ Responses:
 | 404 Not Found | ไม่พบหนังสือที่มี book_idดังกล่าว | json { "error": "Book not found" }  | 
 
 
-
 Additional Notes:
 - Authentication:
 สำหรับ endpoint ที่ต้องการให้มีการตรวจสอบสิทธิ์ (เช่น POST, PATCH, การเพิ่ม saved-book, reviews) ควรส่ง header แบบ:
@@ -182,3 +181,399 @@ Content-Type: application/json
 - 404 Not Found: เมื่อไม่พบ resource ที่ร้องขอ
 
 
+Authors API Documentation-----------------------------------------------------
+🔗 Base URL:
+http://localhost:4000/authors
+
+
+
+1️⃣ Get Author by ID
+🏷️ Method: GET
+🔗 Endpoint:
+/authors/:authorId
+
+
+📌 Description:
+ใช้สำหรับดึงข้อมูลของ Author ตาม authorId
+🔍 Path Parameter:
+| Name | Type | Required | Description | 
+| authorId | integer | ✅ Yes | ID ของ Author ที่ต้องการค้นหา | 
+
+
+🔻 Request Example
+GET /authors/5
+
+
+🔺 Response Example (Success: 200)
+{
+    "success": true,
+    "data": {
+        "author_id": 5,
+        "name": "John Doe",
+        "bio": "An experienced writer specialized in mystery novels."
+    }
+}
+
+
+⚠ Error Responses
+| Status Code | Message | Description | 
+| 404 | Author not found | ไม่พบ Author ตาม ID ที่ระบุ | 
+| 400 | รูปแบบข้อมูล authorId ไม่ถูกต้อง | ID ต้องเป็นตัวเลขและมากกว่า 0 | 
+| 500 | Internal server error. Please try again later | มีข้อผิดพลาดภายในระบบ | 
+
+
+
+2️⃣ Search & Paginate Authors
+🏷️ Method: GET
+🔗 Endpoint:
+/authors
+
+
+📌 Description:
+ใช้สำหรับค้นหา Author โดยเงื่อนไขต่าง ๆ และรองรับ Pagination
+🔍 Query Parameters:
+| Name | Type | Required | Default | Description | 
+| search | string | ❌ No | - | ค้นหาแบบ Partial Match ใน name และ bio | 
+| name | string | ❌ No | - | ค้นหาเฉพาะใน name | 
+| page | integer | ❌ No | 1 | หมายเลขหน้าที่ต้องการแสดงข้อมูล | 
+| limit | integer | ❌ No | 10 | จำนวนรายการต่อหน้า | 
+
+
+🔻 Request Example
+GET /authors?search=John&page=2&limit=5
+
+
+🔺 Response Example (Success: 200)
+{
+    "success": true,
+    "count": 42,
+    "data": [
+        {
+            "author_id": 10,
+            "name": "John Brown",
+            "bio": "A novelist focusing on historical fiction."
+        },
+        {
+            "author_id": 11,
+            "name": "Johnny Silver",
+            "bio": "Writes sci-fi books with a twist of reality."
+        }
+    ]
+}
+
+
+✅ count: 42 หมายถึงจำนวนทั้งหมดของ Author ที่ตรงกับเงื่อนไขที่ค้นหา
+⚠ Error Responses
+| Status Code | Message | Description | 
+| 400 | รูปแบบข้อมูล page ไม่ถูกต้อง | page ต้องเป็นตัวเลขที่มากกว่า 0 | 
+| 400 | รูปแบบข้อมูล limit ไม่ถูกต้อง | limit ต้องเป็นตัวเลขที่มากกว่า 0 | 
+| 500 | Internal server error. Please try again later | มีข้อผิดพลาดภายในระบบ | 
+
+
+
+📌 Notes
+- ใช้ search เมื่ออยากค้นหา Author ตามชื่อ และ bio
+- ใช้ name เมื่ออยากค้นหาเฉพาะชื่อ Author
+- page และ limit ใช้สำหรับ Pagination หากไม่ได้ส่งค่ามาจะคืนค่า ทั้งหมด (ไม่มีการแบ่งหน้า)
+
+
+3️⃣ Create Author
+Method: POST
+Endpoint: /authors
+Description: เพิ่ม Author ใหม่ในระบบ
+📥 Request Body
+{
+  "name": "string",    // required, ชื่อผู้แต่ง
+  "bio": "string"      // optional, ประวัติย่อ
+}
+
+
+| Field | Type | Required | Description | 
+| name | string | ✅ Yes | ชื่อผู้แต่ง | 
+| bio | string | ❌ No | ประวัติย่อ (ถ้ามี) | 
+
+
+🔺 Success Response (201 Created)
+{
+  "success": true,
+  "data": {
+    "author_id": 12,
+    "name": "Jane Austen",
+    "bio": "English novelist known for ..."
+  }
+}
+
+
+⚠️ Error Responses
+| Status | Body | When | 
+| 400 | { "success": false, "message": "ชื่อผู้แต่งเป็น required" } | ถ้า name ไม่ถูกส่งมา หรือเป็นค่าว่าง | 
+| 400 | { "success": false, "message": "รูปแบบข้อมูลไม่ถูกต้อง" } | ถ้า name หรือ bio ไม่ใช่ string | 
+| 500 | { "success": false, "message": "Internal server error. Please try again later" } | เกิดข้อผิดพลาดภายในระบบ | 
+
+
+
+4️⃣ Update Author
+Method: PATCH
+Endpoint: /authors/:authorId
+Middleware: validateId("authorId")
+Description: แก้ไขข้อมูล Author (ปรับได้ทั้งชื่อและประวัติย่อ)
+🔍 Path Parameter
+| Name | Type | Required | Description | 
+| authorId | integer | ✅ Yes | ID ของ Author ที่จะแก้ไข | 
+
+
+📥 Request Body
+{
+  "name": "string",    // optional, ชื่อผู้แต่งใหม่
+  "bio": "string"      // optional, ประวัติย่อใหม่
+}
+
+
+อย่างน้อยต้องส่ง field เดียวใน body
+
+🔺 Success Response (200 OK)
+{
+  "success": true,
+  "data": {
+    "author_id": 12,
+    "name": "Jane A.",
+    "bio": "Updated bio...",
+    "createdAt": "2023-08-01T10:20:30.000Z"
+  }
+}
+
+
+⚠️ Error Responses
+| Status | Body | When | 
+| 400 | { "success": false, "message": "รูปแบบข้อมูล authorId ไม่ถูกต้อง" } | เมื่อ authorId ไม่เป็นตัวเลข หรือ ≤ 0 | 
+| 400 | { "success": false, "message": "ต้องส่ง field อย่างน้อยหนึ่ง field" } | เมื่อ body ไม่ประกอบด้วย name หรือ bio | 
+| 400 | { "success": false, "message": "รูปแบบข้อมูลไม่ถูกต้อง" } | เมื่อ name หรือ bio ไม่ใช่ string | 
+| 404 | { "success": false, "message": "Author not found" } | เมื่อไม่พบ Author ตาม authorId | 
+| 500 | { "success": false, "message": "Internal server error. Please try again later" } | เกิดข้อผิดพลาดภายในระบบ | 
+
+
+
+5️⃣ Delete Author
+Method: DELETE
+Endpoint: /authors/:authorId
+Middleware: validateId("authorId")
+Description: ลบ Author ตาม authorId
+🔍 Path Parameter
+| Name | Type | Required | Description | 
+| authorId | integer | ✅ Yes | ID ของ Author ที่จะลบ | 
+
+
+🔺 Success Response (200 OK)
+{
+  "success": true,
+  "message": "Author deleted successfully"
+}
+
+
+⚠️ Error Responses
+| Status | Body | When | 
+| 400 | { "success": false, "message": "รูปแบบข้อมูล authorId ไม่ถูกต้อง" } | เมื่อ authorId ไม่เป็นตัวเลข หรือ ≤ 0 | 
+| 404 | { "success": false, "message": "Author not found" } | เมื่อไม่พบ Author ตาม authorId | 
+| 500 | { "success": false, "message": "Internal server error. Please try again later" } | เกิดข้อผิดพลาดภายในระบบ | 
+
+
+
+Note:
+- ใช้ validateId("authorId") middleware สำหรับทุก endpoint ที่มี path parameter :authorId เพื่อแปลงและตรวจสอบว่าเป็น integer มากกว่า 0
+- ต้องแน่ใจว่า body ของ POST/PATCH เป็น JSON และตั้งค่า Content-Type: application/json ใน header ของ request
+- ตรวจสอบ error log ใน console เพื่อช่วย debug ในกรณีเกิด 500 Internal Server Error
+
+
+
+
+Categories API Documentation------------------------------------------------------------------------
+
+🔗 Base URL:
+http://localhost:4000/categories
+
+1️⃣ List Categories
+🏷️ Method: GET
+🔗 Endpoint:
+/categories
+
+
+📌 Description:
+ดึงรายการ Category แบบ offset-based pagination พร้อมรองรับ search และ filter by parent
+🔍 Query Parameters:
+| Name       | Type     | Required | Description                                          | |------------|----------|:--------:|------------------------------------------------------| | page       | integer  |    ❌     | หน้าปัจจุบัน (เริ่มที่ 1)                             | | limit      | integer  |    ❌     | จำนวนรายการต่อหน้า (default: 20)                    | | search     | string   |    ❌     | ค้นหาในชื่อ category (partial, case-insensitive)     | | parentId   | integer  |    ❌     | กรองเฉพาะลูกหมวดของ parent_category_id นี้          |
+🔻 Request Example
+GET /categories?page=2&limit=10&search=fic&parentId=5
+
+
+🔺 Response Example (Success: 200)
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "category_id": 12,
+        "name": "Dystopia",
+        "description": "โลกอนาคตที่มืดมน",
+        "parent_category_id": 5,
+        "parent_category": {
+          "category_id": 5,
+          "name": "Science Fiction"
+        },
+        "subcategories": [
+          { "category_id": 18, "name": "Post-Apocalyptic" }
+        ]
+      }
+      // … คืน items ตาม limit …
+    ],
+    "total": 37,
+    "page": 2,
+    "limit": 10,
+    "totalPages": 4
+  }
+}
+
+
+⚠ Error Responses
+| Status Code | Message                                          | Description                          | |-------------|--------------------------------------------------|--------------------------------------| | 400         | รูปแบบ query params ไม่ถูกต้อง                  | เช็ค page/limit/parentId เป็นตัวเลข  | | 500         | Internal server error. Please try again later    | ข้อผิดพลาดภายในระบบ                 |
+
+2️⃣ Get Category by ID
+🏷️ Method: GET
+🔗 Endpoint:
+/categories/:categoryId
+
+
+📌 Description:
+ดึงรายละเอียด Category ตัวเดียว พร้อม parent & subcategories
+🔍 Path Parameter:
+| Name         | Type     | Required | Description                         | |--------------|----------|:--------:|-------------------------------------| | categoryId   | integer  |    ✅    | ID ของ Category ที่ต้องการดึงข้อมูล |
+🔻 Request Example
+GET /categories/5
+
+
+🔺 Response Example (Success: 200)
+{
+  "success": true,
+  "data": {
+    "category_id": 5,
+    "name": "Science Fiction",
+    "description": "เรื่องราวในโลกอนาคต",
+    "parent_category_id": null,
+    "parent_category": null,
+    "subcategories": [
+      { "category_id": 12, "name": "Dystopia" },
+      { "category_id": 13, "name": "Space Opera" }
+    ]
+  }
+}
+
+
+⚠ Error Responses
+| Status Code | Message                                          | Description                        | |-------------|--------------------------------------------------|------------------------------------| | 400         | รูปแบบข้อมูล categoryId ไม่ถูกต้อง              | categoryId ต้องเป็นตัวเลข > 0     | | 404         | Category not found                               | ไม่พบ Category ตาม ID ที่ระบุ      | | 500         | Internal server error. Please try again later    | ข้อผิดพลาดภายในระบบ               |
+
+3️⃣ Create Category
+🏷️ Method: POST
+🔗 Endpoint:
+/categories
+
+
+📌 Description:
+สร้าง Category ใหม่
+📄 Request Body (application/json):
+| Name                 | Type     | Required | Description                               | |----------------------|----------|:--------:|-------------------------------------------| | name                 | string   |    ✅    | ชื่อ Category (max 50 chars, unique)      | | description          | string   |    ❌    | รายละเอียด                               | | parent_category_id   | integer  |    ❌    | ID ของหมวดหลัก (null = top-level)        |
+🔻 Request Example
+POST /categories
+Content-Type: application/json
+
+{
+  "name": "Mystery",
+  "description": "เรื่องลึกลับ ใครเป็นคนทำ",
+  "parent_category_id": 2
+}
+
+
+🔺 Response Example (Success: 201)
+{
+  "success": true,
+  "data": {
+    "category_id": 20,
+    "name": "Mystery",
+    "description": "เรื่องลึกลับ ใครเป็นคนทำ",
+    "parent_category_id": 2,
+    "parent_category": { "category_id": 2, "name": "Fiction" },
+    "subcategories": []
+  }
+}
+
+
+⚠ Error Responses
+| Status Code | Message                                          | Description                         | |-------------|--------------------------------------------------|-------------------------------------| | 400         | Missing or invalid fields                        | name ห้ามว่าง, parent_category_id ต้องมีจริงหรือ null | | 409         | Category name already exists                     | name ต้องไม่ซ้ำกับหมวดอื่น         | | 500         | Internal server error. Please try again later    | ข้อผิดพลาดภายในระบบ                |
+
+4️⃣ Update Category
+🏷️ Method: PUT
+🔗 Endpoint:
+/categories/:categoryId
+
+
+📌 Description:
+อัปเดตข้อมูล Category (ต้องส่งทุกฟิลด์ที่อัปเดต)
+🔍 Path Parameter:
+| Name         | Type     | Required | Description                         | |--------------|----------|:--------:|-------------------------------------| | categoryId   | integer  |    ✅    | ID ของ Category ที่จะอัปเดต         |
+📄 Request Body (application/json):
+| Name                 | Type     | Required | Description                               | |----------------------|----------|:--------:|-------------------------------------------| | name                 | string   |    ✅    | ชื่อ Category (max 50 chars, unique)      | | description          | string   |    ❌    | รายละเอียด                               | | parent_category_id   | integer  |    ❌    | ID ของหมวดหลัก (null = top-level)        |
+🔻 Request Example
+PUT /categories/5
+Content-Type: application/json
+
+{
+  "name": "Sci-Fi",
+  "description": "เรื่องอนาคตและจักรวาล",
+  "parent_category_id": null
+}
+
+
+🔺 Response Example (Success: 200)
+{
+  "success": true,
+  "data": {
+    "category_id": 5,
+    "name": "Sci-Fi",
+    "description": "เรื่องอนาคตและจักรวาล",
+    "parent_category_id": null,
+    "parent_category": null,
+    "subcategories": [ /* … */ ]
+  }
+}
+
+
+⚠ Error Responses
+| Status Code | Message                                          | Description                        | |-------------|--------------------------------------------------|------------------------------------| | 400         | รูปแบบข้อมูลไม่ถูกต้อง                          | categoryId หรือ body ผิดพลาด      | | 404         | Category not found                               | ไม่พบ Category ตาม ID ที่ระบุ     | | 409         | Category name already exists                     | name ซ้ำกับหมวดอื่น                | | 500         | Internal server error. Please try again later    | ข้อผิดพลาดภายในระบบ              |
+
+5️⃣ Delete Category
+🏷️ Method: DELETE
+🔗 Endpoint:
+/categories/:categoryId
+
+
+📌 Description:
+ลบ Category ตาม ID (cascade ลบใน book_categories ตาม schema)
+🔍 Path Parameter:
+| Name         | Type     | Required | Description                         | |--------------|----------|:--------:|-------------------------------------| | categoryId   | integer  |    ✅    | ID ของ Category ที่จะลบ             |
+🔻 Request Example
+DELETE /categories/5
+
+
+🔺 Response Example (Success: 200)
+{
+  "success": true,
+  "message": "Delete category successfully",
+  "data": {
+    "category_id": 5,
+    "name": "Sci-Fi",
+    "description": "…",
+    "parent_category_id": null
+  }
+}
+
+
+⚠ Error Responses
+| Status Code | Message                                          | Description                        | |-------------|--------------------------------------------------|------------------------------------| | 400         | รูปแบบข้อมูล categoryId ไม่ถูกต้อง              | categoryId ต้องเป็นตัวเลข > 0     | | 404         | Category not found                               | ไม่พบ Category ตาม ID ที่ระบุ     | | 409         | Cannot delete category: related records exist    | มีข้อมูลอ้างอิง เช่น หนังสือในหมวด | | 500         | Internal server error. Please try again later    | ข้อผิดพลาดภายในระบบ              |

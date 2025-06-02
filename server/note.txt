@@ -268,3 +268,52 @@ routerBooks.post("/", async (req, res) => {
     });
   }
 });
+
+================================================
+// ไม่จำเป็นต้อง import next เพราะ next เป็น parameter ที่ Express ส่งเข้ามาให้โดยอัตโนมัติ
+export const postBookValidation = (req, res, next) => {
+  const { title, publisher, published_year, cover_url, author_ids, category_ids } = req.body;
+
+  // ตรวจสอบข้อมูลที่จำเป็น
+  if (!title || !publisher || !published_year) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: title, publisher, or published_year"
+    });
+  }
+
+  // ตรวจสอบว่าปีที่พิมพ์เป็นตัวเลขหรือไม่
+  if (isNaN(Number(published_year))) {
+    return res.status(400).json({
+      success: false,
+      message: "published_year must be a valid number"
+    });
+  }
+  
+  // ถ้ามี cover_url ให้ตรวจสอบว่าเป็น URL ที่ถูกต้อง (วิธีง่าย ๆ ด้วย regex แบบเบื้องต้น)
+  if (cover_url && !/^https?:\/\/.+\..+/.test(cover_url)) {
+    return res.status(400).json({
+      success: false,
+      message: "cover_url must be a valid URL"
+    });
+  }
+
+  // ตรวจสอบ author_ids ว่าเป็นอาร์เรย์ (ถ้าส่งมา)
+  if (author_ids && !Array.isArray(author_ids)) {
+    return res.status(400).json({
+      success: false,
+      message: "author_ids must be an array"
+    });
+  }
+
+  // ตรวจสอบ category_ids ว่าเป็นอาร์เรย์ (ถ้าส่งมา)
+  if (category_ids && !Array.isArray(category_ids)) {
+    return res.status(400).json({
+      success: false,
+      message: "category_ids must be an array"
+    });
+  }
+
+  // ถ้าผ่านทุกการตรวจสอบแล้ว ก็ call next เพื่อไปยังต่อไป
+  next();
+};
