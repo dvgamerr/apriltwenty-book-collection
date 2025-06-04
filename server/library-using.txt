@@ -2,8 +2,11 @@ npm init -y
 npm install express
 npm install nodemon
 npm install pg //ไม่ใช้แล้ว เปลี่ยนมาใช้ prismaORG แต่อาจติดตั้งไว้ ใช้ทดสอบง่ายกว่า
+npm bcrypt
+npm jwt
 
 npm dotenv
+
 npm install prisma --save-dev
 npm install @prisma/client
 

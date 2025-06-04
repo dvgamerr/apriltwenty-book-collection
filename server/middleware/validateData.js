@@ -96,3 +96,26 @@ export const postAuthorValidation = (req, res, next) => {
     }
     next();
 }
+//----------------------------------category table--------------------
+export const postCategoryValidation = (req, res, next) => {
+    const { name, description, parent_category_id } = req.body;
+    if (!name) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูลที่ต้องระบุ มีไม่ครบ"
+        });
+    }
+    if (name.length < 3 || name.length > 30 || typeof name !== 'string') {
+        return res.status(400).json({
+            "success": false,
+            "message": "รูปแบบข้อมูลไม่ถูกต้อง"
+        });
+    }
+    if (description !== undefined && description.length >= 1000) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อความ description ยาวเกินที่กำหนด 1000 ตัวอักษร"
+        });
+    }
+    next();
+}

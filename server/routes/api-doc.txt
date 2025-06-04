@@ -577,3 +577,460 @@ DELETE /categories/5
 
 ⚠ Error Responses
 | Status Code | Message                                          | Description                        | |-------------|--------------------------------------------------|------------------------------------| | 400         | รูปแบบข้อมูล categoryId ไม่ถูกต้อง              | categoryId ต้องเป็นตัวเลข > 0     | | 404         | Category not found                               | ไม่พบ Category ตาม ID ที่ระบุ     | | 409         | Cannot delete category: related records exist    | มีข้อมูลอ้างอิง เช่น หนังสือในหมวด | | 500         | Internal server error. Please try again later    | ข้อผิดพลาดภายในระบบ              |
+
+
+
+======================================================review======================================
+Reviews API Documentation
+หมายเหตุ:
+ควรมีระบบ Authentication (เช่น JWT) สำหรับ endpoint ที่ต้องเปลี่ยนแปลงข้อมูล (Create, Update, Delete) เพื่อให้เฉพาะผู้ใช้ที่เกี่ยวข้องสามารถเข้าถึงได้
+โครงสร้าง Error Response ทั่วไป:
+{
+  "success": false,
+  "message": "Description of error"
+}
+
+
+
+
+Data Model: Review
+Review Object Properties:
+| Field | Type | Description | 
+| review_id | Integer | รหัสรีวิว (Primary Key, auto-generated) | 
+| book_id | Integer | รหัสหนังสือ (Foreign Key ไปยัง books.book_id) | 
+| user_id | Integer | รหัสผู้ใช้ที่รีวิว (Foreign Key ไปยัง users.user_id) | 
+| rating | Integer | คะแนนที่ให้กับหนังสือ (เช่น 1-5) | 
+| comment | String (Optional) | ข้อความรีวิวเพิ่มเติม | 
+| created_at | DateTime | เวลารีวิวถูกสร้าง (auto-generated) | 
+
+
+Relation:
+- แต่ละรีวิวถูกเชื่อมโยงกับหนังสือผ่าน books
+- แต่ละรีวิวถูกเชื่อมโยงกับผู้ใช้ผ่าน users
+
+Endpoints
+1. Create a New Review
+- URL: /reviews
+- Method: POST
+- Description: สร้างรีวิวใหม่สำหรับหนังสือที่ระบุ
+- Authentication: Required
+Request Body (JSON):
+{
+  "book_id": 123,
+  "user_id": 456,
+  "rating": 4,
+  "comment": "Great book! Highly recommended."
+}
+
+
+- Field Details:
+- book_id (number, required): รหัสหนังสือที่ต้องรีวิว
+- user_id (number, required): รหัสผู้ใช้ที่โพสต์รีวิว
+- rating (number, required): คะแนนรีวิว (ควรอยู่ในช่วงที่กำหนด เช่น 1-5)
+- comment (string, optional): ข้อความรีวิวเพิ่มเติม
+Success Response:
+- Status: 201 Created
+- Content:
+{
+  "success": true,
+  "message": "Review created successfully",
+  "data": {
+    "review_id": 1,
+    "book_id": 123,
+    "user_id": 456,
+    "rating": 4,
+    "comment": "Great book! Highly recommended.",
+    "created_at": "2025-06-04T08:00:00.000Z"
+  }
+}
+
+
+Error Responses:
+- 400 Bad Request: ถ้าขาดหรือข้อมูลไม่ถูกต้อง
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+2. Retrieve a Single Review
+- URL: /reviews/{reviewId}
+- Method: GET
+- Description: ดึงรายละเอียดรีวิวเฉพาะตาม reviewId
+- Authentication: (อาจไม่จำเป็น ถ้า endpoint นี้ Public)
+Path Parameter:
+| Parameter | Type | Description | 
+| reviewId | integer | รหัสของรีวิวที่ต้องการดู | 
+
+
+Success Response:
+- Status: 200 OK
+- Content:
+{
+  "success": true,
+  "data": {
+    "review_id": 1,
+    "book_id": 123,
+    "user_id": 456,
+    "rating": 4,
+    "comment": "Great book! Highly recommended.",
+    "created_at": "2025-06-04T08:00:00.000Z"
+  }
+}
+
+
+Error Responses:
+- 404 Not Found: ถ้าไม่พบรีวิวที่ตรงกับ reviewId
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+3. Update an Existing Review
+- URL: /reviews/{reviewId}
+- Method: PUT
+- Description: อัปเดตรายละเอียดของรีวิวที่มีอยู่ (สามารถแก้ไข rating และ comment ได้)
+- Authentication: Required
+Path Parameter:
+| Parameter | Type | Description | 
+| reviewId | integer | รหัสของรีวิวที่จะอัปเดต | 
+
+
+Request Body (JSON):
+{
+  "rating": 5,
+  "comment": "After reconsideration, it's a 5 stars!"
+}
+
+
+- Field Details:
+- rating (number, required): คะแนนรีวิวใหม่
+- comment (string, optional): ข้อความรีวิวที่แก้ไข
+Success Response:
+- Status: 200 OK
+- Content:
+{
+  "success": true,
+  "message": "Review updated successfully",
+  "data": {
+    "review_id": 1,
+    "book_id": 123,
+    "user_id": 456,
+    "rating": 5,
+    "comment": "After reconsideration, it's a 5 stars!",
+    "created_at": "2025-06-04T08:00:00.000Z"
+  }
+}
+
+
+Error Responses:
+- 400 Bad Request: ข้อมูลที่ส่งมาไม่ถูกต้อง
+- 404 Not Found: ไม่พบรีวิวที่ต้องการอัปเดต
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+4. Delete a Review
+- URL: /reviews/{reviewId}
+- Method: DELETE
+- Description: ลบรีวิวตาม reviewId
+- Authentication: Required
+Path Parameter:
+| Parameter | Type | Description | 
+| reviewId | integer | รหัสของรีวิวที่ต้องการลบ | 
+
+
+Success Response:
+- Status: 200 OK (หรือ 204 No Content ถ้าไม่ต้องส่งข้อมูลกลับ)
+- Content (ตัวอย่างเมื่อใช้ 200 OK):
+{
+  "success": true,
+  "message": "Review deleted successfully",
+  "data": {
+    "review_id": 1,
+    "book_id": 123,
+    "user_id": 456,
+    "rating": 4,
+    "comment": "Great book! Highly recommended.",
+    "created_at": "2025-06-04T08:00:00.000Z"
+  }
+}
+
+
+Error Responses:
+- 404 Not Found: ถ้าไม่พบรีวิวที่มี reviewId ที่ระบุ
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+5. List Reviews
+- URL: /reviews
+- Method: GET
+- Description: ดึงรายการรีวิวทั้งหมด โดยสามารถกรองตาม book_id หรือ user_id และรองรับการแบ่งหน้าข้อมูล (pagination)
+- Authentication: (ขึ้นอยู่กับรูปแบบ public/private ของ API)
+Query Parameters:
+| Parameter | Type | Required | Description | 
+| book_id | integer | No | กรองรีวิวตามรหัสหนังสือ | 
+| user_id | integer | No | กรองรีวิวตามรหัสผู้ใช้ | 
+| page | integer | No | หมายเลขหน้าของผลลัพธ์ (default: 1) | 
+| limit | integer | No | จำนวนรายการต่อหน้า (default: 10, ข้อจำกัดสูงสุดตัวอย่าง: 100) | 
+
+
+Success Response:
+- Status: 200 OK
+- Content:
+{
+  "success": true,
+  "data": [
+    {
+      "review_id": 1,
+      "book_id": 123,
+      "user_id": 456,
+      "rating": 4,
+      "comment": "Great book! Highly recommended.",
+      "created_at": "2025-06-04T08:00:00.000Z"
+    },
+    {
+      "review_id": 2,
+      "book_id": 124,
+      "user_id": 457,
+      "rating": 3,
+      "comment": "It was decent.",
+      "created_at": "2025-06-04T10:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 25,
+    "totalPages": 3
+  }
+}
+
+
+Error Responses:
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+Additional Considerations
+- Validation:
+ตรวจสอบให้แน่ใจว่า rating อยู่ในช่วงที่กำหนด (เช่น 1-5) และ field อื่นๆ มีการ validate ในระดับ API หรือด้วยไลบรารีเฉพาะ (Zod/Joi)
+- Relations & Data Integrity:
+เมื่อทำงานกับความสัมพันธ์ระหว่าง Review กับ Books และ Users ควรจัดการเรื่อง FK constraints ให้ถูกต้อง (Prisma จะช่วย enforce ผ่าน schema ที่ระบุไว้)
+- Pagination & Sorting:
+สำหรับ endpoint List Reviews อาจต้องการรองรับการจัดเรียง (sorting) ถ้ามีความต้องการในอนาคต
+
+
+=========================== user ================================================
+Users API Documentation
+หมายเหตุ:
+- ควรมีระบบ Authentication (เช่น JWT) เพื่อให้เฉพาะผู้ใช้ที่เกี่ยวข้องสามารถเข้าถึงหรือแก้ไขข้อมูล
+- การเก็บข้อมูลรหัสผ่านควรเข้ารหัส (password_hash) ในฐานข้อมูล และใน API สำหรับการลงทะเบียนให้รับเป็น password แล้วทำการแฮชก่อนบันทึก
+- โครงสร้าง Error Response ทั่วไป (ใช้ status code ตามความเหมาะสม):
+{
+  "success": false,
+  "message": "Description of error"
+}
+
+
+
+
+Data Model: User
+User Object Properties:
+| Field | Type | Description | 
+| user_id | Integer | รหัสผู้ใช้ (Primary Key, auto-generated) | 
+| username | String | ชื่อผู้ใช้งาน (ต้องไม่ซ้ำ) | 
+| email | String | อีเมลผู้ใช้ (ต้องไม่ซ้ำ) | 
+| password_hash | String | รหัสผ่านที่แฮชแล้ว (ไม่ส่งกลับใน response) | 
+| created_at | DateTime | เวลาสร้างบัญชี (auto-generated) | 
+| updated_at | DateTime | เวลาที่ปรับปรุงล่าสุด (auto-generated) | 
+
+
+Relations (ข้อมูลเพิ่มเติมที่อาจเชื่อมโยงอื่นๆ):
+- user_profile ข้อมูลโปรไฟล์ผู้ใช้ (first_name, last_name, bio, avatar_url)
+- reviews รีวิวที่ผู้ใช้โพสต์
+- custom_collections คอลเลกชันหนังสือที่ผู้ใช้สร้างขึ้น
+- user_books สถานะหนังสือในคลังของผู้ใช้ (เช่น want_to_read, reading, read)
+
+Endpoints
+1. Register a New User
+- URL: /users
+- Method: POST
+- Description: ลงทะเบียนผู้ใช้ใหม่ โดยต้องให้ข้อมูล username, email และ password
+- Authentication: ไม่จำเป็น (endpoint สำหรับการลงทะเบียน)
+Request Body (JSON):
+{
+  "username": "john_doe",
+  "email": "john@example.com",
+  "password": "Secret123!"
+}
+
+
+- Field Details:
+- username (string, required): ชื่อผู้ใช้งาน ต้องไม่ซ้ำและมีความยาวที่เหมาะสม (เช่น 3–50 ตัวอักษร)
+- email (string, required): อีเมลของผู้ใช้ ต้องมีรูปแบบที่ถูกต้อง
+- password (string, required): รหัสผ่าน (ความยาวขั้นต่ำอาจกำหนด เช่น 8 ตัวอักษร) (ในระบบจะใช้เพื่อสร้าง password_hash)
+Success Response:
+- Status: 201 Created
+- Content:
+{
+  "success": true,
+  "message": "User registered successfully",
+  "data": {
+    "user_id": 1,
+    "username": "john_doe",
+    "email": "john@example.com",
+    "created_at": "2025-06-04T08:00:00.000Z",
+    "updated_at": "2025-06-04T08:00:00.000Z"
+  }
+}
+
+
+Error Responses:
+- 400 Bad Request: ถ้าข้อมูลไม่ครบหรือรูปแบบข้อมูลไม่ถูกต้อง
+- 409 Conflict: ถ้า username หรือ email มีอยู่ในระบบแล้ว
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+2. Retrieve User Details
+- URL: /users/{userId}
+- Method: GET
+- Description: ดึงข้อมูลผู้ใช้ตามรหัสที่ระบุ
+- Authentication: อาจต้องการให้มีการตรวจสอบสิทธิ์ ขึ้นอยู่กับความเป็นส่วนตัวของข้อมูล
+Path Parameter:
+| Parameter | Type | Description | 
+| userId | integer | รหัสผู้ใช้ (user_id) ที่ต้องการดึงข้อมูล | 
+
+
+Success Response:
+- Status: 200 OK
+- Content:
+{
+  "success": true,
+  "data": {
+    "user_id": 1,
+    "username": "john_doe",
+    "email": "john@example.com",
+    "created_at": "2025-06-04T08:00:00.000Z",
+    "updated_at": "2025-06-04T08:00:00.000Z"
+  }
+}
+
+
+Error Responses:
+- 404 Not Found: ถ้าไม่พบผู้ใช้ที่มีรหัสตามที่ระบุ
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+3. Update User Details
+- URL: /users/{userId}
+- Method: PUT
+- Description: แก้ไขข้อมูลของผู้ใช้ (สามารถแก้ไข username, email, และข้อมูลโปรไฟล์ได้)
+- Authentication: Required (เฉพาะผู้ใช้ที่เป็นเจ้าของข้อมูลเท่านั้น)
+Path Parameter:
+| Parameter | Type | Description | 
+| userId | integer | รหัสผู้ใช้ที่ต้องการแก้ไข | 
+
+
+Request Body (JSON):
+{
+  "username": "john_doe_updated",
+  "email": "john_new@example.com"
+}
+
+
+- Field Details:
+- username (string, optional): ชื่อผู้ใช้ใหม่ (ถ้าแก้ไข ต้องไม่ซ้ำกัน)
+- email (string, optional): อีเมลใหม่ (ต้องมีรูปแบบถูกต้องและไม่ซ้ำ)
+- (หากมีการเปลี่ยนแปลงรหัสผ่าน ก็สามารถเพิ่ม field เช่น password แล้วใน backend จะจัดการแฮชใหม่ก่อนอัปเดต)
+Success Response:
+- Status: 200 OK
+- Content:
+{
+  "success": true,
+  "message": "User updated successfully",
+  "data": {
+    "user_id": 1,
+    "username": "john_doe_updated",
+    "email": "john_new@example.com",
+    "created_at": "2025-06-04T08:00:00.000Z",
+    "updated_at": "2025-06-05T10:00:00.000Z"
+  }
+}
+
+
+Error Responses:
+- 400 Bad Request: ข้อมูลที่ส่งมาไม่ถูกต้อง
+- 404 Not Found: ถ้าไม่พบผู้ใช้ที่ต้องการแก้ไข
+- 409 Conflict: ถ้า username หรือ email ถูกใช้ไปแล้วโดยผู้ใช้คนอื่น
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+4. Delete a User Account
+- URL: /users/{userId}
+- Method: DELETE
+- Description: ลบบัญชีผู้ใช้
+- Authentication: Required (เฉพาะผู้ใช้ที่มีสิทธิ์เท่านั้น)
+Path Parameter:
+| Parameter | Type | Description | 
+| userId | integer | รหัสผู้ใช้ที่ต้องการลบ | 
+
+
+Success Response:
+- Status: 200 OK (หรือ 204 No Content ตามที่เลือกใช้)
+- Content (ตัวอย่างถ้าใช้ 200 OK):
+{
+  "success": true,
+  "message": "User deleted successfully",
+  "data": {
+    "user_id": 1,
+    "username": "john_doe_updated",
+    "email": "john_new@example.com"
+  }
+}
+
+
+Error Responses:
+- 404 Not Found: ถ้าไม่พบผู้ใช้ที่มีรหัสตามที่ระบุ
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+5. List Users
+- URL: /users
+- Method: GET
+- Description: ดึงรายการผู้ใช้ทั้งหมด โดยรองรับการแบ่งหน้า (pagination)
+- Authentication: อาจจะ require admin หรือสำหรับ public endpoint ขึ้นอยู่กับระบบ
+Query Parameters:
+| Parameter | Type | Required | Description | 
+| page | integer | No | หมายเลขหน้าของผลลัพธ์ (default: 1) | 
+| limit | integer | No | จำนวนรายการต่อหน้า (default: 10, max: 100) | 
+| search | string | No | กรองรายชื่อผู้ใช้โดยค้นหาจาก username หรือ email | 
+
+
+Success Response:
+- Status: 200 OK
+- Content:
+{
+  "success": true,
+  "data": [
+    {
+      "user_id": 1,
+      "username": "john_doe",
+      "email": "john@example.com",
+      "created_at": "2025-06-04T08:00:00.000Z"
+    },
+    {
+      "user_id": 2,
+      "username": "jane_doe",
+      "email": "jane@example.com",
+      "created_at": "2025-06-04T09:00:00.000Z"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 50,
+    "totalPages": 5
+  }
+}
+
+
+Error Responses:
+- 500 Internal Server Error: เมื่อเกิดข้อผิดพลาดภายในระบบ
+
+Additional Considerations
+- Security:
+- จัดการข้อมูลรหัสผ่านอย่างรัดกุม (ใช้การแฮช)
+- ป้องกันข้อมูลสำคัญไม่ให้ถูกส่งออกมาใน response (เช่น ไม่ส่ง password_hash)
+- ใช้ middleware สำหรับตรวจสอบ Access Token หรือ JWT ใน endpoint ที่ต้องการความปลอดภัย
+- Validation:
+- ตรวจสอบรูปแบบของ email, ความยาวของ username และความซับซ้อนของ password ด้วย library เช่น Joi หรือ Zod
+- ตรวจสอบ input parameters ทั้งใน query และ body ว่าถูกต้องตาม schema ที่กำหนด
+- Pagination & Filtering:
+- สำหรับการดึงรายการผู้ใช้ สามารถเพิ่มการจัดเรียงข้อมูล (sorting) ได้ในอนาคต
+
+
