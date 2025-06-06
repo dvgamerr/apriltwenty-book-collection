@@ -3,7 +3,8 @@ import routerBooks from "./routes/books.js";
 import routerAuthors from "./routes/authors.js";
 import { PrismaClient } from "@prisma/client";
 import routerCategories from "./routes/categories.js";
-import routerUsers from "./routes/users.js";
+import routerAuth from "./routes/auth.js";
+import routerUsers from "./routes/users.js"
 const prisma = new PrismaClient();
 
 async function init() {
@@ -14,6 +15,7 @@ async function init() {
     app.use("/books", routerBooks);
     app.use("/authors", routerAuthors);
     app.use("/categories", routerCategories);
+    app.use("/auth", routerAuth);
     app.use("/users", routerUsers);
 
 

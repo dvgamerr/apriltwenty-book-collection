@@ -189,7 +189,7 @@ routerBooks.post("/", postBookValidation, async (req, res) => {
         //3 res section
         return res.status(201).json({
             "success": true,
-            "message": "add new book successfully",
+            "message": "Add new book successfully",
             "newbook": result
         })
     } catch (error) {

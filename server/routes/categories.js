@@ -1,8 +1,10 @@
 import { Router } from "express";
 import prisma from "../app.js";
 import { validateId, validateQuery, postCategoryValidation } from "../middleware/validateData.js";
+import { protect } from "../middleware/protect.js"
 
 const routerCategories = Router();
+routerCategories.use(protect);
 
 routerCategories.get("/:categoryId", validateId("categoryId"), async (req, res) => {
     //1 access request
