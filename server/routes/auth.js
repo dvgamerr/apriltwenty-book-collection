@@ -44,7 +44,7 @@ routerAuth.post("/register", postUserValidation, async (req, res) => {
         //3 response
         return res.status(201).json({
             "success": true,
-            "message": "Create user successfully",
+            "message": "User registered successfully",
             "data": result
         });
     } catch (error) {
