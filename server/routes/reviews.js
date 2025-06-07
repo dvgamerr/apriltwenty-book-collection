@@ -32,10 +32,14 @@ routerReviews.post("/", reviewValidation, async (req, res) => {
         });
     }
 });
-routerReviews.get("/reviewId", async (req, res) = > {
+routerReviews.get("/reviewId", async (req, res) => {
     //1 access request
     //2 sql
     //3 response
+    return res.status(200).json({
+        "success": true,
+        "data": result
+    })
 });
 
 export default routerReviews;
