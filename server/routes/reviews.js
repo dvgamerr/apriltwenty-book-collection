@@ -31,8 +31,11 @@ routerReviews.post("/", reviewValidation, async (req, res) => {
             "message": "Internal server error. Please try again later"
         });
     }
-
 });
-
+routerReviews.get("/reviewId", async (req, res) = > {
+    //1 access request
+    //2 sql
+    //3 response
+});
 
 export default routerReviews;
