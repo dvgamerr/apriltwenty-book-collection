@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../app.js";
-import { reviewValidation } from "../middleware/validateData.js"
+import { reviewValidation, validateId } from "../middleware/validateData.js"
 
 const routerReviews = Router();
 
@@ -32,14 +32,31 @@ routerReviews.post("/", reviewValidation, async (req, res) => {
         });
     }
 });
-routerReviews.get("/reviewId", async (req, res) => {
+routerReviews.get("/:reviewId", validateId("reviewId"), async (req, res) => {
     //1 access request
     //2 sql
-    //3 response
-    return res.status(200).json({
-        "success": true,
-        "data": result
-    })
+    const findId = {
+        where: { review_id: req.params.reviewId },
+    };
+    try {
+        const result = await prisma.reviews.findUnique(findId);
+        //3 response
+        if (!result) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Review not found"
+            })
+        }
+        return res.status(200).json({
+            "success": true,
+            "data": result
+        });
+    } catch (error) {
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
 });
 
 export default routerReviews;
