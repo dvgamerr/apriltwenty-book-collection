@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../app.js";
-import { userBookValidation } from "../middleware/validateData.js"
+import { userBookValidation, validateId } from "../middleware/validateData.js"
 
 const routerUserBooks = Router();
 
@@ -43,6 +43,32 @@ routerUserBooks.post("/", userBookValidation, async (req, res) => {
         });
     } catch (error) {
                     console.error("error: " + error)
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
+});
+routerUserBooks.get("/:userBookId", validateId("userBookId"), async (req, res) => {
+    //1 access request
+    //2 sql
+    const findId = {
+        where: { user_book_id: req.params.userBookId },
+    };
+    try {
+        const result = await prisma.user_books.findUnique(findId);
+        //3 response
+        if (!result) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Storage book not found"
+            });
+        }
+        return res.status(200).json({
+            "success": true,
+            "data": result
+        });
+    } catch (error) {
         return res.status(500).json({
             "success": false,
             "message": "Internal server error. Please try again later"
