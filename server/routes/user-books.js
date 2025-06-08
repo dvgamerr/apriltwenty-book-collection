@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../app.js";
-import { userBookValidation, validateId } from "../middleware/validateData.js"
+import { userBookValidation, validateId, userIdValidation, validateQuery } from "../middleware/validateData.js"
 
 const routerUserBooks = Router();
 
@@ -72,6 +72,41 @@ routerUserBooks.get("/:userBookId", validateId("userBookId"), async (req, res) =
         return res.status(500).json({
             "success": false,
             "message": "Internal server error. Please try again later"
+        });
+    }
+});
+routerUserBooks.get("/", validateQuery, userIdValidation,  async (req, res) => {
+    //1 access requset
+    const { user_id, page, limit } = req.query;
+    //2 sql
+    let searchCondition = {};
+    if (user_id) {
+        searchCondition = {
+            user_id: user_id
+        }
+    }
+    let queryOption = { 
+        where: searchCondition,
+    };
+    if (page !== undefined && limit !== undefined) {
+        const pageInt = parseInt(page, 10);
+        const limitInt = parseInt(limit, 10);
+        queryOption.skip = (pageInt - 1) * limitInt;
+        queryOption.take = limitInt;
+    }
+    try {
+        const result = await prisma.reviews.findMany(queryOption);
+        const count = await prisma.reviews.count({ where: searchCondition });
+        //3 response
+        return res.status(200).json({
+            "success": true,
+            "count": count,
+            "data": result
+        });
+    } catch (error) {
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again"
         });
     }
 });

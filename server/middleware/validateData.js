@@ -13,7 +13,7 @@ export function validateId(paramName) {
         req.params[paramName] = idInt;
         next();
     }
-}
+};
 
 export const validateQuery = (req, res, next) => {
     const { page, limit} = req.query;
@@ -42,7 +42,23 @@ export const validateQuery = (req, res, next) => {
     }
     next();
 }
-
+export const userIdValidation = (req, res, next) => {
+    const { user_id } = req.body;
+    const userIdInt = parseInt(user_id, 10);
+    if (!user_id) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูลที่ต้องการมีไม่ครบ"
+        });
+    }
+    if (isNaN(userIdInt) || userIdInt < 0) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูล user ไม่ถูกต้อง"
+        });
+    }
+    next();
+};
 //-------------------------------- books validation -----------------------------------
 export const postBookValidation = (req, res, next) => {
     const { title, description, isbn, publisher, published_year, cover_url, author_ids, category_ids } = req.body;
