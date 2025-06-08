@@ -1,19 +1,36 @@
 import { Router } from "express";
 import prisma from "../app.js";
-import { reviewValidation, validateId, validateQuery } from "../middleware/validateData.js"
+import { reviewValidation, validateId, validateQuery, reviewUpdateValidation } from "../middleware/validateData.js"
 
 const routerReviews = Router();
 
 routerReviews.post("/", reviewValidation, async (req, res) => {
     //1 access request
     const { book_id, user_id, rating, comment } = req.body;
+    const userIdInt = parseInt(user_id, 10);
+    const bookIdInt = parseInt(book_id,10);
+    const ratingInt = parseInt(rating, 10)
     try {
         //2 sql
+        const user = await prisma.users.findUnique({ where: { user_id: userIdInt } });
+        if (!user) {
+            return res.status(404).json({
+                "success": false,
+                "message": "User not found"
+            });
+        }
+        const book = await prisma.books.findUnique({ where: { book_id: bookIdInt }});
+        if (!book) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Book not found"
+            });
+        }
         const createReview = {
             data: {
-                book_id,
-                user_id,
-                rating,
+                book_id: bookIdInt,
+                user_id: userIdInt,
+                rating: ratingInt,
                 comment,
                 created_at: new Date()
             }
@@ -98,6 +115,72 @@ routerReviews.get("/", validateQuery, async (req, res) => {
         return res.status(500).json({
             "success": false,
             "message": "Internal server error. Please try again"
+        });
+    }
+});
+routerReviews.put("/:reviewId", validateId("reviewId"), reviewUpdateValidation, async (req, res) => {
+    //1 access request
+    const { rating, comment } = req.body;
+    //extra validate
+    const checkReview = await prisma.reviews.findUnique({
+        where: { review_id: req.params.reviewId }
+    });
+    if (!checkReview) {
+        return res.status(404).json({
+            "success": false,
+            "message": "Review not found"
+        });
+    }
+    const updateReview = {
+        where: { review_id: req.params.reviewId },
+        data: {
+            rating,
+            comment
+        }
+    }
+    //2 sql
+    try {
+        const result = await prisma.reviews.update(updateReview);
+        //3 response
+        return res.status(200).json({
+            "success": true,
+            "message": "Update review successfully",
+            "data": result
+        });        
+    } catch(error) {
+        console.error("error:" + error)
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
+});
+routerReviews.delete("/:reviewId", validateId("reviewId"), async (req, res) => {
+    //1 access requset
+    //2 sql
+    const deleteReview = {
+        where: { review_id: req.params.reviewId }
+    }
+    try {
+        const deleteTarget = await prisma.reviews.findUnique(deleteReview);
+        if (!deleteTarget) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Review not found"
+            });
+        }
+        const result = await prisma.reviews.delete(deleteReview);
+        //3 response
+        return res.status(200).json({
+            "success": true,
+            "message": "Delete review successfully",
+            "data": result
+        });
+    } catch (error) {
+            console.error(error)
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
         });
     }
 });

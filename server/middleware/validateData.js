@@ -119,7 +119,6 @@ export const postCategoryValidation = (req, res, next) => {
     }
     next();
 }
-
 //------------------------------------ users ---------------------------------------------
 export const postUserValidation = (req, res, next) => {
     const { username, email, password } = req.body;
@@ -220,18 +219,82 @@ export const emailValidation = (req, res, next) => {
 //=========================================== review =======================================
 
 export const reviewValidation = (req, res, next) => {
-    const { user_id, book_id, rating } = req.body;
-    if (!user_id || !book_id || !rating) {
+    const { user_id, book_id, rating, comment } = req.body;
+    const userIdInt = parseInt(user_id, 10);
+    const bookIdInt = parseInt(book_id,10);
+    const ratingInt = parseInt(rating, 10)
+    if (!user_id || !book_id || !rating || !comment) {
         return res.status(400).json({
             "success": false,
             "message": "ข้อมูลที่ต้องการมีไม่ครบ"
         });
     }
-    if (rating < 1 || rating > 5 || typeof rating !== "number") {
+    if (isNaN(userIdInt) || userIdInt < 0) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูล user ไม่ถูกต้อง"
+        });
+    }
+    if (isNaN(bookIdInt) || bookIdInt < 0) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูล book ไม่ถูกต้อง"
+        });
+    }
+    if (isNaN(ratingInt) || ratingInt < 1 || ratingInt > 5) {
         return res.status(400).json({
             "success": false,
             "message": "คะแนนรีวิว ต้องเป็นเลข 1-5"
         });
     }
     next();
-}
+};
+export const reviewUpdateValidation = (req, res, next) => {
+    const { rating, comment } = req.body;
+    const ratingInt = parseInt(rating, 10)
+    if (isNaN(ratingInt) || !ratingInt || ratingInt < 1 || ratingInt > 5) {
+        return res.status(400).json({
+            "success": false,
+            "message": "คะแนนรีวิว ต้องเป็นเลข 1-5"
+        });
+    }
+    if (!comment) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูลที่ต้องการมีไม่ครบ"
+        });
+    }
+    next();
+};
+
+//==================================user_books=====================
+export const userBookValidation = (req, res, next) => {
+    const { user_id, book_id, status } = req.body;
+    const userIdInt = parseInt(user_id, 10);
+    const bookIdInt = parseInt(book_id,10);
+    if (!user_id || !book_id || !status) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูลที่ต้องการมีไม่ครบ"
+        });
+    }
+    if (isNaN(userIdInt) || userIdInt < 0) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูล user ไม่ถูกต้อง"
+        });
+    }
+    if (isNaN(bookIdInt) || bookIdInt < 0) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูล book ไม่ถูกต้อง"
+        });
+    }
+    if (status != "want_to_read" && status != "reading" && status != "read") {
+        return res.status(400).json({
+            "success": false,
+            "message": "กำหนดค่า status: want_to_read, reading, หรือ read"
+        });
+    }
+    next();
+};

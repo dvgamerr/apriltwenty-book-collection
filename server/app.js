@@ -6,6 +6,7 @@ import routerCategories from "./routes/categories.js";
 import routerAuth from "./routes/auth.js";
 import routerUsers from "./routes/users.js"
 import routerReviews from "./routes/reviews.js";
+import routerUserBooks from "./routes/user-books.js";
 const prisma = new PrismaClient();
 
 async function init() {
@@ -19,6 +20,7 @@ async function init() {
     app.use("/auth", routerAuth);
     app.use("/users", routerUsers);
     app.use("/reviews", routerReviews);
+    app.use("/userbooks", routerUserBooks);
 
 
     app.listen(PORT, () => {
