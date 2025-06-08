@@ -77,13 +77,18 @@ routerUserBooks.get("/:userBookId", validateId("userBookId"), async (req, res) =
 });
 routerUserBooks.get("/", validateQuery, userIdValidation,  async (req, res) => {
     //1 access requset
-    const { user_id, page, limit } = req.query;
+    const { user_id, status, page, limit } = req.query;
+    const userIdInt = parseInt(user_id, 10);
     //2 sql
     let searchCondition = {};
+    if (user_id || status) {
+        searchCondition.AND = [];
+    }
     if (user_id) {
-        searchCondition = {
-            user_id: user_id
-        }
+        searchCondition.AND.push({ user_id: userIdInt });
+    }
+    if (status) {
+        searchCondition.AND.push({ status });
     }
     let queryOption = { 
         where: searchCondition,
@@ -95,8 +100,8 @@ routerUserBooks.get("/", validateQuery, userIdValidation,  async (req, res) => {
         queryOption.take = limitInt;
     }
     try {
-        const result = await prisma.reviews.findMany(queryOption);
-        const count = await prisma.reviews.count({ where: searchCondition });
+        const result = await prisma.user_books.findMany(queryOption);
+        const count = await prisma.user_books.count({ where: searchCondition });
         //3 response
         return res.status(200).json({
             "success": true,

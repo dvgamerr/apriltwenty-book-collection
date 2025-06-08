@@ -35,7 +35,7 @@ export const validateQuery = (req, res, next) => {
         if (isNaN(limitInt) || limitInt <= 0) {
             return res.status(400).json({
                 "success": false,
-                "message": "รูปแบบข้อมูล limite ไม่ถูกต้อง"
+                "message": "รูปแบบข้อมูล limit ไม่ถูกต้อง"
             });
         }
         req.query.limit = limitInt;
@@ -43,7 +43,7 @@ export const validateQuery = (req, res, next) => {
     next();
 }
 export const userIdValidation = (req, res, next) => {
-    const { user_id } = req.body;
+    const { user_id } = req.query;
     const userIdInt = parseInt(user_id, 10);
     if (!user_id) {
         return res.status(400).json({
