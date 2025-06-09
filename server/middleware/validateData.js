@@ -46,12 +46,6 @@ export const userIdQueryValidation = (req, res, next) => {
         const { user_id }  = req.query;
         if (user_id) {
             const userIdInt = parseInt(user_id, 10);
-            if (!user_id) {
-                return res.status(400).json({
-                    "success": false,
-                    "message": "ข้อมูลที่ต้องการมีไม่ครบ"
-                });
-            }
             if (isNaN(userIdInt) || userIdInt < 1) {
                 return res.status(400).json({
                     "success": false,
@@ -63,20 +57,18 @@ export const userIdQueryValidation = (req, res, next) => {
 };
 export const userIdBodyValidation = (req, res, next) => {
         const { user_id }  = req.body;
-        if (user_id) {
-            const userIdInt = parseInt(user_id, 10);
-            if (!user_id) {
-                return res.status(400).json({
-                    "success": false,
-                    "message": "ข้อมูลที่ต้องการมีไม่ครบ"
-                });
-            }
-            if (isNaN(userIdInt) || userIdInt < 1) {
-                return res.status(400).json({
-                    "success": false,
-                    "message": "ข้อมูล user ไม่ถูกต้อง"
-                });
-            }
+        const userIdInt = parseInt(user_id, 10);
+        if (!user_id) {
+            return res.status(400).json({
+                "success": false,
+                "message": "ข้อมูลที่ต้องการมีไม่ครบ"
+            });
+        }
+        if (isNaN(userIdInt) || userIdInt < 1) {
+            return res.status(400).json({
+                "success": false,
+                "message": "ข้อมูล user ไม่ถูกต้อง"
+            });
         }
     next();
 };
@@ -345,3 +337,25 @@ export const userBookStatusValidation = (req, res, next) => {
     }
     next();
 };
+
+//===================== custom collections =======================
+export const nameBodyValidation = (req, res, next) => {
+    const { name } = req.body;
+    if (name.length < 1 || name.length > 100) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูล name ต้องมี 1-100ตัวอักษร"
+        });
+    }
+    next();
+};
+export const descriptionBodyValidation = (req, res, next) => {
+    const { description } = req.body;
+    if (description.length < 1) {
+        return res.status(400).json({
+            "success": false,
+            "message": "ข้อมูล description สั้นเกินไป"
+        });
+    }
+    next();
+}

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../app.js";
-import { userIdBodyValidation, validateId, validateQuery, userIdQueryValidation } from "../middleware/validateData.js"
+import { userIdBodyValidation, validateId, validateQuery, userIdQueryValidation, nameBodyValidation, descriptionBodyValidation } from "../middleware/validateData.js"
 
 const routerCustomCollections = Router();
 routerCustomCollections.post("/", userIdBodyValidation, async (req, res) => {
@@ -113,5 +113,41 @@ routerCustomCollections.get("/", validateQuery, userIdQueryValidation,  async (r
         });
     }
 });
-
+routerCustomCollections.put("/:collectionId", validateId("collectionId"), nameBodyValidation, descriptionBodyValidation, async (req, res) => {
+    //1 access request
+    const { name, description } = req.body;
+    //extra validate
+    try {
+        const checkReview = await prisma.custom_collections.findUnique({
+            where: { collection_id: req.params.collectionId }
+        });
+        if (!checkReview) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Collection book not found"
+            });
+        }
+        const updateCollection = {
+            where: { collection_id: req.params.collectionId },
+            data: {
+                name,
+                description
+            }
+        }
+        //2 sql
+        const result = await prisma.custom_collections.update(updateCollection);
+        //3 response
+        return res.status(200).json({
+            "success": true,
+            "message": "Update collection successfully",
+            "data": result
+        });        
+    } catch(error) {
+        console.error("error:" + error)
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
+});
 export default routerCustomCollections;
