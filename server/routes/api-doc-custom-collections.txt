@@ -1,0 +1,239 @@
+Custom Collections API Documentation
+API นี้มุ่งเน้นให้ผู้ใช้สามารถสร้างและจัดการ custom collection สำหรับเก็บรายการหนังสือที่ชื่นชอบ โดยในแต่ละ collection จะมีการเชื่อมโยงกับตาราง collection_books ซึ่งเก็บรายการหนังสือใน collection นั้น ๆ
+หมายเหตุ: API นี้ต้องการการตรวจสอบ token (เช่น JWT) ผ่าน middleware เพื่อให้แน่ใจว่าเฉพาะผู้ใช้ที่ได้รับอนุญาตเท่านั้นที่สามารถดำเนินการกับข้อมูลของตนเองได้
+
+
+Base URL
+https://your-domain.com/api
+
+
+เปลี่ยน URL ให้ตรงกับที่ใช้งานจริง
+
+
+Endpoints
+1. Create a Custom Collection
+- Endpoint: POST /custom-collections
+- Description: สร้าง custom collection ใหม่สำหรับผู้ใช้
+- Authentication: Required (Bearer token)
+Request Headers
+| Header | Value | 
+| Authorization | Bearer {token} | 
+| Content-Type | application/json | 
+
+
+Request Body
+{
+  "user_id": 123,
+  "name": "My Favorite Books",
+  "description": "A collection of all my favorite reads."
+}
+
+
+หมายเหตุ: ตรวจสอบว่า user_id ที่ส่งเข้ามาต้องตรงกับ token ของผู้ใช้ที่ทำการร้องขอ
+
+Response
+- Status Code: 201 Created
+{
+  "collection_id": 1,
+  "user_id": 123,
+  "name": "My Favorite Books",
+  "description": "A collection of all my favorite reads.",
+  "created_at": "2025-06-09T10:45:00.000Z"
+}
+
+
+Error Responses
+- 400 Bad Request: เมื่อข้อมูล input ไม่ครบถ้วนหรือข้อมูลรูปแบบไม่ถูกต้อง
+- 401 Unauthorized: ถ้า token ไม่ถูกต้องหรือไม่มีการส่ง token
+
+2. Get Custom Collections by User
+- Endpoint: GET /custom-collections
+- Description: ดึงรายการ custom collections ทั้งหมดของผู้ใช้
+- Authentication: Required (Bearer token)
+- Query Parameters:
+- user_id: (integer) รหัสผู้ใช้ที่ต้องการดึง collections
+Request Example
+GET /custom-collections?user_id=123
+Authorization: Bearer {token}
+
+
+Response
+- Status Code: 200 OK
+[
+  {
+    "collection_id": 1,
+    "user_id": 123,
+    "name": "My Favorite Books",
+    "description": "A collection of all my favorite reads.",
+    "created_at": "2025-06-09T10:45:00.000Z"
+  },
+  {
+    "collection_id": 2,
+    "user_id": 123,
+    "name": "To Read Later",
+    "description": "Books I want to read in the future.",
+    "created_at": "2025-06-09T10:50:00.000Z"
+  }
+]
+
+
+
+3. Get Custom Collection Details
+- Endpoint: GET /custom-collections/{collection_id}
+- Description: ดึงรายละเอียดของ custom collection แบบละเอียด รวมถึงหนังสือภายใน collection (ผ่านการ join กับตาราง collection_books)
+- Authentication: Required (Bearer token)
+Request Example
+GET /custom-collections/1
+Authorization: Bearer {token}
+
+
+Response
+- Status Code: 200 OK
+{
+  "collection_id": 1,
+  "user_id": 123,
+  "name": "My Favorite Books",
+  "description": "A collection of all my favorite reads.",
+  "created_at": "2025-06-09T10:45:00.000Z",
+  "books": [
+    {
+      "book_id": 10,
+      "title": "The Great Gatsby",
+      "cover_url": "https://example.com/covers/gatsby.jpg"
+    },
+    {
+      "book_id": 15,
+      "title": "1984",
+      "cover_url": "https://example.com/covers/1984.jpg"
+    }
+  ]
+}
+
+
+Error Responses
+- 404 Not Found: หากไม่พบ collection ที่ระบุ
+
+4. Update a Custom Collection
+- Endpoint: PUT /custom-collections/{collection_id}
+(หรือใช้ PATCH หากต้องการ update เพียงบาง field)
+- Description: อัพเดตชื่อหรือรายละเอียดของ custom collection
+- Authentication: Required (Bearer token)
+Request Headers
+| Header | Value | 
+| Authorization | Bearer {token} | 
+| Content-Type | application/json | 
+
+
+Request Body (PUT)
+{
+  "name": "My Updated Collection Name",
+  "description": "Updated description for my collection."
+}
+
+
+หมายเหตุ: สำหรับ PATCH สามารถส่งเฉพาะ field ที่ต้องการปรับปรุง
+
+Response
+- Status Code: 200 OK
+{
+  "collection_id": 1,
+  "user_id": 123,
+  "name": "My Updated Collection Name",
+  "description": "Updated description for my collection.",
+  "created_at": "2025-06-09T10:45:00.000Z",
+  "updated_at": "2025-06-09T11:00:00.000Z"
+}
+
+
+Error Responses
+- 400 Bad Request: หากข้อมูลส่งมาไม่ถูกต้อง
+- 401 Unauthorized: ถ้า token ไม่ถูกต้อง
+
+5. Delete a Custom Collection
+- Endpoint: DELETE /custom-collections/{collection_id}
+- Description: ลบ custom collection ที่สร้างไว้ (และ cascade ลบข้อมูลใน collection_books)
+- Authentication: Required (Bearer token)
+Request Example
+DELETE /custom-collections/1
+Authorization: Bearer {token}
+
+
+Response
+- Status Code: 200 OK (หรือ 204 No Content)
+{
+  "message": "Custom collection deleted successfully."
+}
+
+
+Error Responses
+- 404 Not Found: หาก collection ไม่พบ
+- 401 Unauthorized: หาก token ไม่ถูกต้อง
+
+6. Add a Book to a Custom Collection
+- Endpoint: POST /custom-collections/{collection_id}/books
+- Description: เพิ่มหนังสือเข้าไปใน custom collection โดยสร้าง record ใน collection_books
+- Authentication: Required (Bearer token)
+Request Headers
+| Header | Value | 
+| Authorization | Bearer {token} | 
+| Content-Type | application/json | 
+
+
+Request Body
+{
+  "book_id": 10
+}
+
+
+หมายเหตุ: ตรวจสอบให้แน่ใจว่า book_id ที่ส่งเข้ามามีอยู่ในระบบแล้ว
+
+Response
+- Status Code: 201 Created
+{
+  "collection_id": 1,
+  "book_id": 10,
+  "message": "Book successfully added to custom collection."
+}
+
+
+Error Responses
+- 404 Not Found: หากไม่พบ collection หรือหนังสือที่ระบุ
+- 400 Bad Request: หากหนังสือมีอยู่แล้วใน collection
+
+7. Remove a Book from a Custom Collection
+- Endpoint: DELETE /custom-collections/{collection_id}/books/{book_id}
+- Description: ลบหนังสือออกจาก custom collection
+- Authentication: Required (Bearer token)
+Request Example
+DELETE /custom-collections/1/books/10
+Authorization: Bearer {token}
+
+
+Response
+- Status Code: 200 OK
+{
+  "message": "Book removed from custom collection successfully."
+}
+
+
+Error Responses
+- 404 Not Found: หากไม่พบรายการหนังสือใน collection ที่ระบุ
+- 401 Unauthorized: หาก token ไม่ถูกต้อง
+
+Additional Considerations
+- Validation:
+- ตรวจสอบความถูกต้องของ input สำหรับฟิลด์ที่จำเป็น เช่น name ต้องไม่เป็นค่าว่าง และ user_id ควรเป็นผู้ใช้ที่มีอยู่
+- ตรวจสอบว่า book_id ที่ส่งเข้ามาในการเพิ่มหนังสือมีอยู่ในระบบหรือไม่
+- Error Handling:
+- ส่ง error response ที่ชัดเจน พร้อมกับข้อความเพื่อให้ผู้พัฒนา frontend สามารถแสดงข้อความที่เข้าใจง่ายให้กับผู้ใช้
+- ใช้ HTTP status codes ที่เหมาะสมกับข้อผิดพลาดที่เกิดขึ้น
+- Security:
+- ใช้การตรวจสอบ token และ ensure ให้ผู้ใช้สามารถเข้าถึงเฉพาะ collection ของตนเองเท่านั้น
+- ตรวจสอบสิทธิ์ (authorization) โดยเปรียบเทียบ user_id ใน token กับ user_id ใน collection
+- Response Timing and Pagination:
+- หากผู้ใช้มี custom collections จำนวนมาก อาจพิจารณาเพิ่มระบบ pagination สำหรับ endpoint การดึงรายการ
+- ตัวอย่างการส่ง query parameters สำหรับ pagination เช่น ?page=1&limit=10
+- Logging and Auditing:
+- จัดทำ log เกี่ยวกับการสร้าง, อัพเดต และลบข้อมูล เพื่อรองรับการตรวจสอบย้อนหลังในกรณีเกิดข้อผิดพลาด
+
+
