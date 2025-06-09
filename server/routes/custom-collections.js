@@ -27,7 +27,7 @@ routerCustomCollections.post("/", userIdBodyValidation, async (req, res) => {
         //3 response
         return res.status(201).json({
             "success": true,
-            "message": "Save book successfully",
+            "message": "Create collection successfully",
             "data": result
         });
     } catch (error) {
@@ -43,6 +43,9 @@ routerCustomCollections.get("/:collectionId", validateId("collectionId"), async 
     //2 sql
     const findId = {
         where: { collection_id: req.params.collectionId },
+        include: {
+            collection_books: true
+        }
     };
     try {
         const result = await prisma.custom_collections.findUnique(findId);
@@ -144,6 +147,116 @@ routerCustomCollections.put("/:collectionId", validateId("collectionId"), nameBo
         });        
     } catch(error) {
         console.error("error:" + error)
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
+});
+routerCustomCollections.delete("/:collectionId", validateId("collectionId"), async (req, res) => {
+    //1 access requset
+    //2 sql
+    const deleteCollection = {
+        where: { collection_id: req.params.collectionId }
+    }
+    try {
+        const deleteTarget = await prisma.custom_collections.findUnique(deleteCollection);
+        if (!deleteTarget) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Collection book not found"
+            });
+        }
+        const result = await prisma.custom_collections.delete(deleteCollection);
+        //3 response
+        return res.status(200).json({
+            "success": true,
+            "message": "Delete collection successfully",
+            "data": result
+        });
+    } catch (error) {
+            console.error(error)
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
+});
+
+routerCustomCollections.post("/:collectionId/books", validateId("collectionId"), async (req, res) => {
+    const { book_id } = req.body;
+    const bookIdInt = parseInt(book_id, 10);
+    try {
+        //2 sql
+        const book = await prisma.books.findUnique({ where: { book_id: bookIdInt } });
+        if (!book) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Book not found"
+            });
+        }
+        const collision = await prisma.collection_books.findFirst({
+        where: {
+            book_id: bookIdInt
+        }
+        });
+        if (collision) {
+            return res.status(409).json({
+                "success": false,
+                "message": "หนังสือเล่มนี้มีอยู่ในcollectionแล้ว"
+            });
+        }
+        const collectionBook = {
+            data: {
+                collection_id: req.params.collectionId,
+                book_id: bookIdInt
+            },
+            include: {
+                custom_collections: true,
+                books: true
+            }
+        };
+        const result = await prisma.collection_books.create(collectionBook);
+        //3 response
+        return res.status(201).json({
+            "success": true,
+            "message": "Book successfully added to custom collection.",
+            "data": result
+        });
+    } catch (error) {
+                    console.error("error: " + error)
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
+});
+routerCustomCollections.delete("/:collectionId/books/:bookId", validateId("collectionId"), validateId("bookId"), async (req, res) => {
+    try {
+        //2 sql
+        const collectionBook = await prisma.collection_books.findFirst({ where: { collection_id: req.params.collectionId, book_id: req.params.bookId } });
+        if (!collectionBook) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Collection book not found"
+            });
+        }
+        const result = await prisma.collection_books.delete({
+                where: {
+                    collection_id_book_id: {
+                        collection_id: req.params.collectionId,
+                        book_id: req.params.bookId,
+                    }
+                }
+        });
+        //3 response
+        return res.status(200).json({
+            "success": true,
+            "message": "Delete book in collection successfully",
+            "data": result
+        });
+    } catch (error) {
+            console.error(error)
         return res.status(500).json({
             "success": false,
             "message": "Internal server error. Please try again later"
