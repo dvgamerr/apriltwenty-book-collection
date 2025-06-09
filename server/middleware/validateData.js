@@ -61,6 +61,25 @@ export const userIdQueryValidation = (req, res, next) => {
         }
     next();
 };
+export const userIdBodyValidation = (req, res, next) => {
+        const { user_id }  = req.body;
+        if (user_id) {
+            const userIdInt = parseInt(user_id, 10);
+            if (!user_id) {
+                return res.status(400).json({
+                    "success": false,
+                    "message": "ข้อมูลที่ต้องการมีไม่ครบ"
+                });
+            }
+            if (isNaN(userIdInt) || userIdInt < 1) {
+                return res.status(400).json({
+                    "success": false,
+                    "message": "ข้อมูล user ไม่ถูกต้อง"
+                });
+            }
+        }
+    next();
+};
 //-------------------------------- books validation -----------------------------------
 export const postBookValidation = (req, res, next) => {
     const { title, description, isbn, publisher, published_year, cover_url, author_ids, category_ids } = req.body;
