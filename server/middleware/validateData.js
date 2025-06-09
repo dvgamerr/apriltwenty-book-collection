@@ -42,21 +42,23 @@ export const validateQuery = (req, res, next) => {
     }
     next();
 }
-export const userIdValidation = (req, res, next) => {
-    const { user_id } = req.body;
-    const userIdInt = parseInt(user_id, 10);
-    if (!user_id) {
-        return res.status(400).json({
-            "success": false,
-            "message": "ข้อมูลที่ต้องการมีไม่ครบ"
-        });
-    }
-    if (isNaN(userIdInt) || userIdInt < 0) {
-        return res.status(400).json({
-            "success": false,
-            "message": "ข้อมูล user ไม่ถูกต้อง"
-        });
-    }
+export const userIdQueryValidation = (req, res, next) => {
+        const { user_id }  = req.query;
+        if (user_id) {
+            const userIdInt = parseInt(user_id, 10);
+            if (!user_id) {
+                return res.status(400).json({
+                    "success": false,
+                    "message": "ข้อมูลที่ต้องการมีไม่ครบ"
+                });
+            }
+            if (isNaN(userIdInt) || userIdInt < 1) {
+                return res.status(400).json({
+                    "success": false,
+                    "message": "ข้อมูล user ไม่ถูกต้อง"
+                });
+            }
+        }
     next();
 };
 //-------------------------------- books validation -----------------------------------
@@ -306,6 +308,16 @@ export const userBookValidation = (req, res, next) => {
             "message": "ข้อมูล book ไม่ถูกต้อง"
         });
     }
+    if (status != "want_to_read" && status != "reading" && status != "read") {
+        return res.status(400).json({
+            "success": false,
+            "message": "กำหนดค่า status: want_to_read, reading, หรือ read"
+        });
+    }
+    next();
+};
+export const userBookStatusValidation = (req, res, next) => {
+    const status = req.body.status;
     if (status != "want_to_read" && status != "reading" && status != "read") {
         return res.status(400).json({
             "success": false,

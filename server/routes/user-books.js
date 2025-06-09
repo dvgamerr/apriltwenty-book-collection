@@ -1,6 +1,6 @@
 import { Router } from "express";
 import prisma from "../app.js";
-import { userBookValidation, validateId, userIdValidation, validateQuery } from "../middleware/validateData.js"
+import { userBookValidation, validateId, userIdQueryValidation, validateQuery, userBookStatusValidation } from "../middleware/validateData.js"
 
 const routerUserBooks = Router();
 
@@ -75,7 +75,7 @@ routerUserBooks.get("/:userBookId", validateId("userBookId"), async (req, res) =
         });
     }
 });
-routerUserBooks.get("/", validateQuery,  async (req, res) => {
+routerUserBooks.get("/", validateQuery, userIdQueryValidation,  async (req, res) => {
     //1 access requset
     const { user_id, status, page, limit } = req.query;
     const userIdInt = parseInt(user_id, 10);
@@ -124,5 +124,110 @@ routerUserBooks.get("/", validateQuery,  async (req, res) => {
         });
     }
 });
+routerUserBooks.put("/:userBookId", validateId("userBookId"), userBookStatusValidation, async (req, res) => {
+    //1 access request
+    const { status } = req.body;
+    //extra validate
+    const checkReview = await prisma.user_books.findUnique({
+        where: { user_book_id: req.params.userBookId }
+    });
+    if (!checkReview) {
+        return res.status(404).json({
+            "success": false,
+            "message": "Review not found"
+        });
+    }
+    const updateStatus = {
+        where: { user_book_id: req.params.userBookId },
+        data: {
+            status
+        }
+    }
+    //2 sql
+    try {
+        const result = await prisma.user_books.update(updateStatus);
+        //3 response
+        return res.status(200).json({
+            "success": true,
+            "message": "Update status successfully",
+            "data": result
+        });        
+    } catch(error) {
+        console.error("error:" + error)
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
+});
+/*
+import { UserBookStatus } from '@prisma/client'; // ดึง enum มาใช้จาก Prisma
 
+routerUserBooks.put("/:userBookId", validateId("userBookId"), async (req, res) => {
+    const { status } = req.body;
+
+    // ตรวจสอบว่าค่าที่รับมาถูกต้องหรือไม่
+    if (!Object.values(UserBookStatus).includes(status)) {
+        return res.status(400).json({
+            success: false,
+            message: `ค่าของ status ไม่ถูกต้อง ต้องเป็น ${Object.values(UserBookStatus).join(", ")}`
+        });
+    }
+
+    try {
+        const result = await prisma.user_books.update({
+            where: { user_book_id: req.params.userBookId },
+            data: { status: UserBookStatus[status] } // ใช้ enum จาก Prisma
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Update status successfully",
+            data: result
+        });
+
+    } catch (error) {
+        if (error.code === 'P2025') {
+            return res.status(404).json({
+                success: false,
+                message: "Review not found"
+            });
+        }
+        console.error("error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error. Please try again later"
+        });
+    }
+});
+*/
+routerUserBooks.delete("/:userBookId", validateId("userBookId"), async (req, res) => {
+    //1 access requset
+    //2 sql
+    const deleteUserBook = {
+        where: { user_book_id: req.params.userBookId }
+    }
+    try {
+        const deleteTarget = await prisma.user_books.findUnique(deleteUserBook);
+        if (!deleteTarget) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Keep book not found"
+            });
+        }
+        const result = await prisma.user_books.delete(deleteUserBook);
+        //3 response
+        return res.status(200).json({
+            "success": true,
+            "message": "Delete review successfully",
+            "data": result
+        });
+    } catch (error) {
+            console.error(error)
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
+});
 export default routerUserBooks;
