@@ -1,0 +1,87 @@
+User Profile API Documentation
+Base URL: /api/user-profile
+Endpoints
+1. Get User Profile
+- Method: GET
+- URL: /api/user-profile/:user_id
+- Description: ดึงข้อมูลโปรไฟล์ของผู้ใช้ตาม user_id
+- Request Parameters:
+- user_id (Integer, required) - ID ของผู้ใช้ที่ต้องการดูโปรไฟล์
+- Response:
+{
+  "user_id": 1,
+  "first_name": "Atchariya",
+  "last_name": "P",
+  "bio": "Backend developer passionate about API design",
+  "avatar_url": "https://example.com/avatar.jpg"
+}
+- Error Responses:
+- 404 - User Profile ไม่พบ
+- 500 - Internal Server Error
+
+2. Create User Profile
+- Method: POST
+- URL: /api/user-profile
+- Description: สร้างข้อมูลโปรไฟล์ใหม่สำหรับผู้ใช้
+- Request Body:
+{
+  "user_id": 1,
+  "first_name": "Atchariya",
+  "last_name": "P",
+  "bio": "Backend developer passionate about API design",
+  "avatar_url": "https://example.com/avatar.jpg"
+}
+- Response:
+{
+  "message": "User profile created successfully",
+  "user_profile": {
+    "user_id": 1,
+    "first_name": "Atchariya",
+    "last_name": "P",
+    "bio": "Backend developer passionate about API design",
+    "avatar_url": "https://example.com/avatar.jpg"
+  }
+}
+- Error Responses:
+- 400 - ข้อมูลไม่ครบถ้วนหรือไม่ถูกต้อง
+- 500 - Internal Server Error
+
+3. Update User Profile
+- Method: PUT
+- URL: /api/user-profile/:user_id
+- Description: แก้ไขข้อมูลโปรไฟล์ของผู้ใช้
+- Request Parameters:
+- user_id (Integer, required) - ID ของผู้ใช้
+- Request Body: (สามารถอัปเดตบางส่วนได้)
+{
+  "first_name": "Atchariya",
+  "last_name": "P",
+  "bio": "Refining my backend skills",
+  "avatar_url": "https://example.com/new-avatar.jpg"
+}
+- Response:
+{
+  "message": "User profile updated successfully",
+  "updated_fields": {
+    "bio": "Refining my backend skills",
+    "avatar_url": "https://example.com/new-avatar.jpg"
+  }
+}
+- Error Responses:
+- 404 - User Profile ไม่พบ
+- 400 - ข้อมูลไม่ถูกต้อง
+- 500 - Internal Server Error
+
+4. Delete User Profile
+- Method: DELETE
+- URL: /api/user-profile/:user_id
+- Description: ลบข้อมูลโปรไฟล์ของผู้ใช้
+- Request Parameters:
+- user_id (Integer, required) - ID ของผู้ใช้
+- Response:
+{
+  "message": "User profile deleted successfully"
+}
+- Error Responses:
+- 404 - User Profile ไม่พบ
+- 500 - Internal Server Error

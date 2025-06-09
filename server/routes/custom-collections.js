@@ -44,7 +44,7 @@ routerCustomCollections.get("/:collectionId", validateId("collectionId"), async 
     const findId = {
         where: { collection_id: req.params.collectionId },
         include: {
-            collection_books: true
+            collection_books: { include: { books: { select: { book_id: true, title: true, cover_url: true } } } }
         }
     };
     try {
