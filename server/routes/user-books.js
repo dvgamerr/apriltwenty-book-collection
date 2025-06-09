@@ -75,20 +75,29 @@ routerUserBooks.get("/:userBookId", validateId("userBookId"), async (req, res) =
         });
     }
 });
-routerUserBooks.get("/", validateQuery, userIdValidation,  async (req, res) => {
+routerUserBooks.get("/", validateQuery,  async (req, res) => {
     //1 access requset
     const { user_id, status, page, limit } = req.query;
     const userIdInt = parseInt(user_id, 10);
     //2 sql
     let searchCondition = {};
-    if (user_id || status) {
-        searchCondition.AND = [];
-    }
     if (user_id) {
-        searchCondition.AND.push({ user_id: userIdInt });
+        searchCondition = {
+            user_id: userIdInt
+        }
     }
     if (status) {
-        searchCondition.AND.push({ status });
+        searchCondition = {
+            status: status
+        }
+    }
+    if (status && user_id) {
+        searchCondition = {
+            AND: [
+                { user_id: userIdInt },
+                { status }
+            ]
+        }
     }
     let queryOption = { 
         where: searchCondition,
