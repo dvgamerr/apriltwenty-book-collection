@@ -1,8 +1,11 @@
 import { Router } from "express";
 import prisma from "../app.js";
 import { userIdBodyValidation, validateId, validateQuery, userIdQueryValidation, nameBodyValidation, descriptionBodyValidation } from "../middleware/validateData.js"
+import { protect } from "../middleware/protect.js"
 
 const routerCustomCollections = Router();
+routerCustomCollections.use(protect);
+
 routerCustomCollections.post("/", userIdBodyValidation, async (req, res) => {
     //1 access request
     const { user_id, name, description } = req.body;

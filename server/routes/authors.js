@@ -1,8 +1,10 @@
 import { Router } from "express";
 import prisma from "../app.js";
 import { postAuthorValidation, validateId, validateQuery } from "../middleware/validateData.js";
+import { protect } from "../middleware/protect.js"
 
 const routerAuthors = Router();
+routerAuthors.use(protect);
 
 routerAuthors.get("/:authorId", validateId("authorId"), async (req, res) => {
     //1 access request

@@ -1,16 +1,25 @@
 import { Router } from "express";
 import prisma from "../app.js";
 import { userBookValidation, validateId, userIdQueryValidation, validateQuery, userBookStatusValidation } from "../middleware/validateData.js"
+import { protect } from "../middleware/protect.js"
 
 const routerUserBooks = Router();
+routerUserBooks.use(protect);
 
-routerUserBooks.post("/", userBookValidation, async (req, res) => {
+routerUserBooks.post("/", protect, userBookValidation, async (req, res) => {
     //1 access request
     const { book_id, user_id, status } = req.body;
+    const userIdFromTokenInt = parseInt(req.user.user_id, 10);
     const userIdInt = parseInt(user_id, 10);
     const bookIdInt = parseInt(book_id,10);
     try {
         //2 sql
+        if (userIdFromTokenInt !== userIdInt) {
+            return res.status(403).json({
+                "success": false,
+                "message": "User ID mismatch: Access denied"
+            });
+        }
         const user = await prisma.users.findUnique({ where: { user_id: userIdInt } });
         if (!user) {
             return res.status(404).json({

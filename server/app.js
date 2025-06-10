@@ -1,3 +1,6 @@
+import swaggerJsdoc from'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import routerBooks from "./routes/books.js";
@@ -25,6 +28,21 @@ async function init() {
     app.use("/userbooks", routerUserBooks);
     app.use("/customcollections", routerCustomCollections);
     app.use("/userprofile", routerUserProfile);
+
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "User Book API",
+      version: "1.0.0",
+      description: "API สำหรับจัดการหนังสือของผู้ใช้"
+    }
+  },
+  apis: ["./routes/*.js"] // หรือกำหนด path ไฟล์ที่มี JSDoc
+};
+
+const specs = swaggerJsdoc(options);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 
     app.listen(PORT, () => {
