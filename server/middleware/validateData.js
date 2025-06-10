@@ -359,3 +359,37 @@ export const descriptionBodyValidation = (req, res, next) => {
     }
     next();
 }
+
+//================================ user profile =============================
+export const firstNameValidation = (req, res, next) => {
+    const first_name = req.body.first_name;
+    if (!first_name) {
+        return res.status(400).json({
+            "success": false,
+            "message": "กรุณาใส่ข้อมูล First name"
+        });
+    }
+    if (first_name.length < 2 || first_name.length > 50) {
+        return res.status(400).json({
+            "success": false,
+            "message": "กรุณาใส่ข้อมูล First name 2-50 ตัวอักษร"
+        });
+    }
+    next();
+}
+export const lastNameValidation = (req, res, next) => {
+    const last_name = req.body.last_name;
+    if (!last_name) {
+        return res.status(400).json({
+            "success": false,
+            "message": "กรุณาใส่ข้อมูล Last_name"
+        });
+    }
+    if (last_name.length < 2 || last_name.length > 50) {
+        return res.status(400).json({
+            "success": false,
+            "message": "กรุณาใส่ข้อมูล Last_name 2-50 ตัวอักษร"
+        });
+    }
+    next();
+}

@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 export const protect = (req, res, next) => {
     const token = req.headers.authorization;
-    if (!token || !token.startsWith("Bearer ")) {
+    if (!token.startsWith("Bearer ")) {
         console.log(token)
         return res.status(401).json({
             "success": false,

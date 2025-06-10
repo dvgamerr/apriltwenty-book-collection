@@ -1,11 +1,11 @@
 import { Router } from "express";
 import prisma from "../app.js";
-import { userIdBodyValidation, validateId } from "../middleware/validateData.js";
+import { userIdBodyValidation, validateId, firstNameValidation, lastNameValidation } from "../middleware/validateData.js";
 import { protect } from "../middleware/protect.js";
 
 const routerUserProfile = Router();
 
-routerUserProfile.post("/", protect, userIdBodyValidation,  async (req, res) => {
+routerUserProfile.post("/", protect, userIdBodyValidation, firstNameValidation, lastNameValidation, async (req, res) => {
     //1 access request
     const { user_id, first_name, last_name, bio, avatar_url } = req.body;
     const userIdFromTokenInt = parseInt(req.user.user_id, 10);
@@ -48,7 +48,7 @@ routerUserProfile.post("/", protect, userIdBodyValidation,  async (req, res) => 
         });
     }
 });
-routerUserProfile.patch("/:userId", protect, validateId("userId"), async (req, res) => {
+routerUserProfile.patch("/:userId", protect, firstNameValidation, lastNameValidation, validateId("userId"), async (req, res) => {
     //1 access request
     const { first_name, last_name, bio, avatar_url } = req.body;
     const userIdFromTokenInt = parseInt(req.user.user_id, 10);
@@ -112,6 +112,40 @@ routerUserProfile.get("/:userId", validateId("userId"), async (req, res) => {
             "data": result
         });
     } catch (error) {
+        return res.status(500).json({
+            "success": false,
+            "message": "Internal server error. Please try again later"
+        });
+    }
+});
+routerUserProfile.delete("/:userId", protect, validateId("userId"), async (req, res) => {
+    const userIdFromTokenInt = parseInt(req.user.user_id, 10);
+    try {
+        if (userIdFromTokenInt !== req.params.userId) {
+            return res.status(403).json({
+                "success": false,
+                "message": "User ID mismatch: Access denied"
+            });
+        }
+        //2 sql
+        const user = await prisma.user_profile.findFirst({ where: { user_id: userIdFromTokenInt } });
+        if (!user) {
+            return res.status(404).json({
+                "success": false,
+                "message": "Profile not found"
+            });
+        }
+        const result = await prisma.user_profile.delete({
+                where: { user_id: userIdFromTokenInt }
+        });
+        //3 response
+        return res.status(200).json({
+            "success": true,
+            "message": "Delete profile successfully",
+            "data": result
+        });
+    } catch (error) {
+            console.error(error)
         return res.status(500).json({
             "success": false,
             "message": "Internal server error. Please try again later"
