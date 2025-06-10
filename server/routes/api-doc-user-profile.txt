@@ -1,3 +1,9 @@
+{
+"username": "fortest1",
+"password": "test1111",
+"email": "a@a.com"
+}
+
 User Profile API Documentation
 Base URL: /api/user-profile
 Endpoints
