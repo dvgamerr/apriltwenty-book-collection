@@ -1,6 +1,0 @@
-/users:
-  get:
-    summary: "ดึงข้อมูลรายการผู้ใช้"
-    responses:
-      "200":
-        description: "ดึงข้อมูลสำเร็จ"

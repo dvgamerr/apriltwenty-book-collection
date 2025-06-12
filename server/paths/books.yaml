@@ -1,6 +1,0 @@
-/books:
-  get:
-    summary: "ดึงข้อมูลรายชื่อหนังสือ"
-    responses:
-      "200":
-        description: "ดึงข้อมูลหนังสือสำเร็จ"
