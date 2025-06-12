@@ -1,0 +1,346 @@
+openapi: 3.0.0
+info:
+  title: Books API
+  version: "1.0.0"
+  description: "API สำหรับจัดการผู้ใช้งาน (Users)"
+tags:
+  - name: Users
+    description: Endpoints สำหรับจัดการผู้ใช้งาน
+
+paths:
+  /users/{userId}:
+    parameters:
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: integer
+        description: "ID ของผู้ใช้งาน"
+    get:
+      security: []
+      tags: [Users]
+      summary: "ดึงข้อมูลผู้ใช้งานตาม userId"
+      responses:
+        '200':
+          description: "สำเร็จ"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      security: []
+      tags: [Users]
+      summary: "ลบผู้ใช้งาน"
+      description: "ลบผู้ใช้งานโดยระบุ userId"
+      responses:
+        '200':
+          description: "Delete user successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Delete user successfully"
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+          
+  /users:
+    get:
+      security: []
+      tags: [Users]
+      summary: "ดึงรายการผู้ใช้งาน"
+      description: "ดึงข้อมูลผู้ใช้งานทั้งหมด โดยรองรับการค้นหาด้วย username และแบ่งหน้า (pagination)"
+      parameters:
+        - in: query
+          name: username
+          schema:
+            type: string
+          description: "ค้นหาผู้ใช้งานตาม username (แบบ contains, case-insensitive)"
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: "หมายเลขหน้าที่ต้องการ"
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+          description: "จำนวนรายการต่อหน้า"
+      responses:
+        '200':
+          description: "สำเร็จ"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 50
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/updateusername/{userId}:
+    patch:
+      security: []
+      tags: [Users]
+      summary: "อัปเดต username ของผู้ใช้งาน"
+      description: "อัปเดต username โดยตรวจสอบให้ username ใหม่ไม่ซ้ำในระบบ"
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: "ID ของผู้ใช้งาน"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUsernameUpdateInput'
+      responses:
+        '200':
+          description: "Update user successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Update user successfully"
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/updatepassword/{userId}:
+    patch:
+      security: []
+      tags: [Users]
+      summary: "อัปเดต password ของผู้ใช้งาน"
+      description: "ตรวจสอบ old password และปรับปรุง password ใหม่"
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: "ID ของผู้ใช้งาน"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPasswordUpdateInput'
+      responses:
+        '200':
+          description: "Update user successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Update user successfully"
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/updateemail/{userId}:
+    patch:
+      security: []
+      tags: [Users]
+      summary: "อัปเดต email ของผู้ใช้งาน"
+      description: "ปรับปรุง email โดยตรวจสอบไม่ให้ email ซ้ำในระบบ"
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: "ID ของผู้ใช้งาน"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEmailUpdateInput'
+      responses:
+        '200':
+          description: "Update email successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Update email successfully"
+                  data:
+                    $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 12
+        username:
+          type: string
+          example: "john_doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-06-12T12:34:56Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-06-12T12:34:56Z"
+      required: [user_id, username, email]
+  
+    UserUsernameUpdateInput:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string
+          example: "new_username"
+  
+    UserPasswordUpdateInput:
+      type: object
+      required:
+        - old_password
+        - password
+      properties:
+        old_password:
+          type: string
+          example: "old_secret"
+        password:
+          type: string
+          example: "new_secret"
+  
+    UserEmailUpdateInput:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: "new_email@example.com"
+  
+  responses:
+    NotFound:
+      description: "User not found"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "User not found"
+    InternalError:
+      description: "Internal server error. Please try again later."
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Internal server error. Please try again later."
+    Conflict:
+      description: "User already exists or duplicate field"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "ชื่อ username john_doe มีอยู่ในระบบแล้ว"
+    Unauthorized:
+      description: "ข้อมูล password ไม่ถูกต้อง"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "ข้อมูล password ไม่ถูกต้อง"

@@ -1,0 +1,195 @@
+tags:
+  - name: Books
+    description: Endpoints สำหรับจัดการหนังสือ
+
+# ------------------------------------------------------------------
+paths:
+  /books:
+    get:
+      security: []
+      tags: [Books]
+      summary: ดึงข้อมูลหนังสือทั้งหมด (รองรับตัวกรอง)
+      parameters:
+        - in: query
+          name: name
+          schema: { type: string }
+          description: ค้นชื่อหนังสือแบบ contains
+        - in: query
+          name: category
+          schema: { type: string }
+          description: ค้นชื่อหมวดหมู่
+        - in: query
+          name: author
+          schema: { type: string }
+          description: ค้นชื่อผู้แต่ง
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+          description: หน้าที่ต้องการ (ใช้ร่วมกับ limit)
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1 }
+          description: จำนวนรายการต่อหน้า
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  count:   { type: integer, example: 123 }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Book' }
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      security: []
+      tags: [Books]
+      summary: สร้างหนังสือใหม่
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BookInput' }
+      responses:
+        '201':
+          description: เพิ่มหนังสือใหม่สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string,  example: "Add new book successfully" }
+                  newbook: { $ref: '#/components/schemas/Book' }
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /books/{bookId}:
+    parameters:
+      - in: path
+        name: bookId
+        required: true
+        schema: { type: integer }
+        description: ID ของหนังสือ
+
+    get:
+      security: []
+      tags: [Books]
+      summary: ดึงข้อมูลหนังสือตาม bookId
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      security: []
+      tags: [Books]
+      summary: อัปเดตข้อมูลหนังสือ
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BookInput' }
+      responses:
+        '200':
+          description: อัปเดตสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string,  example: "Update book data successfully" }
+                  data:    { $ref: '#/components/schemas/Book' }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      security: []
+      tags: [Books]
+      summary: ลบหนังสือ
+      responses:
+        '200':
+          description: ลบสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string,  example: "Delete book successfully" }
+                  data:    { $ref: '#/components/schemas/Book' }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+# ------------------------------------------------------------------
+components:
+  schemas:
+    # ---------- OUTPUT ----------
+    Book:
+      type: object
+      properties:
+        book_id:        { type: integer, example: 10 }
+        title:          { type: string,  example: "The Pragmatic Programmer" }
+        description:    { type: string,  example: "A classic programming book." }
+        isbn:           { type: string,  example: "978-0135957059" }
+        publisher:      { type: string,  example: "Addison-Wesley" }
+        published_year: { type: integer, example: 2019 }
+        cover_url:      { type: string,  example: "https://example.com/cover.jpg" }
+        author:
+          type: array
+          items: { type: string }
+          example: ["Andy Hunt", "Dave Thomas"]
+        category:
+          type: array
+          items: { type: string }
+          example: ["Software Engineering", "Best Practices"]
+      required: [book_id, title, isbn]
+
+    # ---------- INPUT ----------
+    BookInput:
+      type: object
+      required: [title, isbn]
+      properties:
+        title:          { type: string,  example: "The Pragmatic Programmer" }
+        description:    { type: string,  example: "A classic programming book." }
+        isbn:           { type: string,  example: "978-0135957059" }
+        publisher:      { type: string,  example: "Addison-Wesley" }
+        published_year: { type: integer, example: 2019 }
+        cover_url:      { type: string,  example: "https://example.com/cover.jpg" }
+        author_ids:
+          type: array
+          items:
+            oneOf:
+              - type: integer
+              - type: string
+          example: [1, "Andy Hunt"]
+        category_ids:
+          type: array
+          items:
+            oneOf:
+              - type: integer
+              - type: string
+          example: [3, "Software Engineering"]
+
+  responses: {}

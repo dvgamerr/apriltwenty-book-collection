@@ -1,0 +1,175 @@
+tags:
+  - name: Authors
+    description: Endpoints สำหรับจัดการผู้แต่ง
+
+# ---------- PATHS ----------
+paths:
+  /authors:
+    get:
+      tags: [Authors]
+      summary: ค้น/ดึงรายชื่อผู้แต่ง
+      parameters:
+        - in: query
+          name: name
+          schema: { type: string }
+          description: ค้นชื่อผู้แต่งแบบตรงตัว (case-insensitive)
+        - in: query
+          name: search
+          schema: { type: string }
+          description: ค้นทั้งชื่อและ bio
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+          description: หน้าที่ต้องการ (ใช้ร่วมกับ limit)
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1 }
+          description: จำนวนรายการต่อหน้า
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  count:   { type: integer, example: 42 }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Author' }
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags: [Authors]
+      summary: สร้างผู้แต่งใหม่
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuthorInput' }
+      responses:
+        '201':
+          description: เพิ่มผู้แต่งสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string,  example: "Add new author successfully" }
+                  data:    { $ref: '#/components/schemas/Author' }
+        '409':
+          description: ชื่อผู้แต่งซ้ำ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: false }
+                  message: { type: string,  example: "ชื่อ author John Doe มีอยู่ในระบบแล้ว" }
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /authors/{authorId}:
+    parameters:
+      - in: path
+        name: authorId
+        required: true
+        schema: { type: integer }
+        description: ID ของผู้แต่ง
+
+    get:
+      tags: [Authors]
+      summary: ดึงผู้แต่งตาม authorId
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  data:    { $ref: '#/components/schemas/Author' }
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags: [Authors]
+      summary: แก้ไขข้อมูลผู้แต่ง
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuthorInput' }
+      responses:
+        '200':
+          description: แก้ไขสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string,  example: "Update author successfully" }
+                  data:    { $ref: '#/components/schemas/Author' }
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: ชื่อผู้แต่งซ้ำ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: false }
+                  message: { type: string,  example: "ชื่อ author John Doe มีอยู่ในระบบแล้ว" }
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [Authors]
+      summary: ลบผู้แต่ง
+      responses:
+        '200':
+          description: ลบสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string,  example: "Delete author successfully" }
+                  data:    { $ref: '#/components/schemas/Author' }
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+# ---------- SCHEMAS ----------
+components:
+  schemas:
+    Author:
+      type: object
+      properties:
+        author_id: { type: integer, example: 7 }
+        name:      { type: string,  example: "John Doe" }
+        bio:       { type: string,  example: "John Doe is a freelance writer…" }
+      required: [author_id, name]
+
+    AuthorInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          description: ชื่อผู้แต่ง
+          example: "John Doe"
+        bio:
+          type: string
+          description: ประวัติย่อ
+          example: "John Doe is a freelance writer…"

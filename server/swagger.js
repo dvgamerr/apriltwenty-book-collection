@@ -1,20 +1,41 @@
-import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
+  import swaggerJsdoc from "swagger-jsdoc";
+  import swaggerUi from "swagger-ui-express";
 
-const options = {
-  definition: {
-    openapi: "3.0.0",
-    info: {
-      title: "Books API",
-      version: "1.0.0",
-      description: "API สำหรับจัดการหนังสือ By AprilTwenry",
-    },
-  },
-  apis: ["./routes/books.js"], // ระบุไฟล์ที่มี JSDoc comments
-};
+  const options = {
+    definition: {
+      openapi: "3.0.0",
+      info: {
+        title: "Books API",
+        version: "1.0.0",
+        description: "API สำหรับจัดการหนังสือ By AprilTwenry & Copilot AI",
+      },
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT"
+          }
+        }
+      },
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+        servers: [
+          { url: "http://localhost:4000", description: "Local server" }
+        ],
+      },
 
-const swaggerSpec = swaggerJsdoc(options);
+    apis: [
+      "./swagger/*.yaml"
+    ],
+  };
 
-export default (app) => {
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-};
+
+  const swaggerSpec = swaggerJsdoc(options);
+
+  export default (app) => {
+    app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  };

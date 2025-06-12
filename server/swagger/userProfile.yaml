@@ -1,0 +1,251 @@
+
+tags:
+  - name: UserProfile
+    description: Endpoints สำหรับจัดการโปรไฟล์ผู้ใช้งาน
+
+paths:
+  /user-profile:
+    post:
+      security:
+        - bearerAuth: []
+      tags: [UserProfile]
+      summary: สร้างโปรไฟล์ผู้ใช้งาน (Create Profile)
+      description: สร้างโปรไฟล์ใหม่โดยรับข้อมูล user_id, first_name, last_name, bio, และ avatar_url
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileInput'
+      responses:
+        '201':
+          description: Create profile successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Create profile successfully"
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /user-profile/{userId}:
+    parameters:
+      - in: path
+        name: userId
+        required: true
+        schema:
+          type: integer
+        description: ID ของผู้ใช้งาน
+    get:
+      security: []  # ไม่ต้องตรวจสอบ token
+      tags: [UserProfile]
+      summary: ดึงข้อมูลโปรไฟล์ผู้ใช้งาน (Get Profile)
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    patch:
+      security:
+        - bearerAuth: []
+      tags: [UserProfile]
+      summary: อัปเดตข้อมูลโปรไฟล์ (Update Profile)
+      description: อัปเดตข้อมูลโปรไฟล์โดยรับค่า first_name, last_name, bio, และ avatar_url  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdateInput'
+      responses:
+        '200':
+          description: Update profile successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Update profile successfully"
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      security:
+        - bearerAuth: []
+      tags: [UserProfile]
+      summary: ลบโปรไฟล์ผู้ใช้งาน (Delete Profile)
+      responses:
+        '200':
+          description: Delete profile successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Delete profile successfully"
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 7
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        bio:
+          type: string
+          example: "This is my bio."
+        avatar_url:
+          type: string
+          example: "https://example.com/avatar.jpg"
+      required:
+        - user_id
+        - first_name
+        - last_name
+
+    UserProfileInput:
+      type: object
+      required:
+        - user_id
+        - first_name
+        - last_name
+      properties:
+        user_id:
+          type: integer
+          example: 7
+          description: "ID ของผู้ใช้งาน"
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        bio:
+          type: string
+          example: "This is my bio."
+        avatar_url:
+          type: string
+          example: "https://example.com/avatar.jpg"
+
+    UserProfileUpdateInput:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        bio:
+          type: string
+          example: "Updated bio."
+        avatar_url:
+          type: string
+          example: "https://example.com/new-avatar.jpg"
+
+  responses:
+    NotFound:
+      description: "Profile not found"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Profile not found"
+    InternalError:
+      description: "Internal server error. Please try again later."
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Internal server error. Please try again later."
+    Conflict:
+      description: "Userprofile already exists"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Userprofile already exist"
+    Forbidden:
+      description: "User ID mismatch: Access denied"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "User ID mismatch: Access denied"

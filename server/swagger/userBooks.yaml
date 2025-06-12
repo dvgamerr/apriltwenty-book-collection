@@ -1,0 +1,246 @@
+
+tags:
+  - name: UserBooks
+    description: Endpoints สำหรับจัดการหนังสือที่ผู้ใช้บันทึก
+
+paths:
+  /user_books:
+    post:
+      tags: [UserBooks]
+      summary: บันทึกหนังสือในรายการของผู้ใช้
+      description: เพิ่มหนังสือเข้าสู่ user_books โดยระบุ book_id, user_id, status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserBookInput'
+      responses:
+        '201':
+          description: Save book successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Save book successfully"
+                  data:
+                    $ref: '#/components/schemas/UserBook'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    get:
+      tags: [UserBooks]
+      summary: ดึงรายการหนังสือของผู้ใช้
+      description: ค้น user_books โดย filter ด้วย user_id, status พร้อม pagination
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: integer
+          description: ID ของผู้ใช้
+        - in: query
+          name: status
+          schema:
+            type: string
+          description: สถานะหนังสือ (เช่น reading, completed)
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: หมายเลขหน้าที่ต้องการ
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+          description: จำนวนรายการต่อหน้า
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 12
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserBook'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /user_books/{userBookId}:
+    parameters:
+      - in: path
+        name: userBookId
+        required: true
+        schema:
+          type: integer
+        description: ID ของ record ในตาราง user_books
+
+    get:
+      tags: [UserBooks]
+      summary: ดึงข้อมูลบันทึกหนังสือ
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/UserBook'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    put:
+      tags: [UserBooks]
+      summary: อัปเดตสถานะหนังสือ
+      description: แก้ไขเฉพาะฟิลด์ status โดยระบุ userBookId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserBookStatusInput'
+      responses:
+        '200':
+          description: Update status successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Update status successfully"
+                  data:
+                    $ref: '#/components/schemas/UserBook'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags: [UserBooks]
+      summary: ลบบันทึกหนังสือของผู้ใช้
+      responses:
+        '200':
+          description: Delete user book successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Delete review successfully"
+                  data:
+                    $ref: '#/components/schemas/UserBook'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    UserBook:
+      type: object
+      properties:
+        user_book_id:
+          type: integer
+          example: 100
+        book_id:
+          type: integer
+          example: 12
+        user_id:
+          type: integer
+          example: 7
+        status:
+          type: string
+          example: "reading"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-06-12T12:34:56Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-06-13T09:21:00Z"
+      required:
+        - user_book_id
+        - book_id
+        - user_id
+        - status
+
+    UserBookInput:
+      type: object
+      required:
+        - book_id
+        - user_id
+        - status
+      properties:
+        book_id:
+          type: integer
+          example: 12
+        user_id:
+          type: integer
+          example: 7
+        status:
+          type: string
+          description: สถานะหนังสือ (e.g., reading, completed)
+          example: "reading"
+
+    UserBookStatusInput:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: สถานะใหม่ของหนังสือ
+          example: "completed"
+
+  responses:
+    Forbidden:
+      description: "User ID mismatch: Access denied"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "User ID mismatch: Access denied"

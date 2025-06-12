@@ -1,0 +1,450 @@
+tags:
+  - name: CustomCollections
+    description: Endpoints สำหรับจัดการ Collection ของผู้ใช้งาน
+
+paths:
+  # ========================================================
+  # ส่วนที่ 1: จัดการ Custom Collections
+  # ========================================================
+  /custom_collections:
+    post:
+      tags: [CustomCollections]
+      summary: สร้าง Collection ใหม่
+      description: สร้าง collection ใหม่โดยใช้ user_id, name และ description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomCollectionInput'
+      responses:
+        '201':
+          description: Create collection successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Create collection successfully"
+                  data:
+                    $ref: '#/components/schemas/CustomCollection'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "User not found"
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    get:
+      tags: [CustomCollections]
+      summary: ดึงข้อมูล Collections ตาม query parameters
+      description: ดึงข้อมูล collections โดยใช้ query parameters "user_id", "name", "page", และ "limit"
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: integer
+          description: user_id ที่ต้องการค้นหา
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: ค้นหาชื่อ collection (แบบ contains, case-insensitive)
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: หน้าที่ต้องการ (สำหรับการแบ่งหน้า)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+          description: จำนวนรายการต่อหน้า
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 5
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CustomCollection'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /custom_collections/{collectionId}:
+    parameters:
+      - in: path
+        name: collectionId
+        required: true
+        schema:
+          type: integer
+        description: ID ของ collection
+    get:
+      tags: [CustomCollections]
+      summary: ดึงข้อมูล Collection ตาม collectionId
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/CustomCollection'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [CustomCollections]
+      summary: อัปเดตข้อมูล Collection
+      description: อัปเดตข้อมูล collection โดยระบุ collectionId พร้อมส่ง request body ที่มี name และ description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomCollectionUpdateInput'
+      responses:
+        '200':
+          description: Update collection successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Update collection successfully"
+                  data:
+                    $ref: '#/components/schemas/CustomCollection'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [CustomCollections]
+      summary: ลบ Collection
+      responses:
+        '200':
+          description: Delete collection successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Delete collection successfully"
+                  data:
+                    $ref: '#/components/schemas/CustomCollection'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  # ========================================================
+  # ส่วนที่ 2: จัดการหนังสือภายใน Custom Collections
+  # ========================================================
+  /custom_collections/{collectionId}/books:
+    post:
+      tags: [CustomCollections]
+      summary: เพิ่มหนังสือลงใน Collection
+      description: เพิ่มหนังสือเข้าไปใน custom collection โดยระบุ collectionId ใน path และ book_id ใน request body
+      parameters:
+        - in: path
+          name: collectionId
+          required: true
+          schema:
+            type: integer
+          description: ID ของ collection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - book_id
+              properties:
+                book_id:
+                  type: integer
+                  example: 45
+      responses:
+        '201':
+          description: Book successfully added to custom collection.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Book successfully added to custom collection."
+                  data:
+                    $ref: '#/components/schemas/CollectionBook'
+        '404':
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Book not found"
+        '409':
+          description: หนังสือเล่มนี้มีอยู่ใน collection แล้ว
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "หนังสือเล่มนี้มีอยู่ใน collection แล้ว"
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /custom_collections/{collectionId}/books/{bookId}:
+    parameters:
+      - in: path
+        name: collectionId
+        required: true
+        schema:
+          type: integer
+        description: ID ของ collection
+      - in: path
+        name: bookId
+        required: true
+        schema:
+          type: integer
+        description: ID ของหนังสือที่ต้องการลบออกจาก collection
+    delete:
+      tags: [CustomCollections]
+      summary: ลบหนังสือออกจาก Collection
+      responses:
+        '200':
+          description: Delete book in collection successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Delete book in collection successfully"
+                  data:
+                    $ref: '#/components/schemas/CollectionBook'
+        '404':
+          description: Collection book not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Collection book not found"
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    CustomCollection:
+      type: object
+      properties:
+        collection_id:
+          type: integer
+          example: 101
+        user_id:
+          type: integer
+          example: 12
+        name:
+          type: string
+          example: "My Favorite Books"
+        description:
+          type: string
+          example: "A collection of my favorite books."
+        collection_books:
+          type: array
+          description: "รายการหนังสือใน collection (ถ้ามี)"
+          items:
+            type: object
+            properties:
+              book:
+                type: object
+                properties:
+                  book_id:
+                    type: integer
+                    example: 45
+                  title:
+                    type: string
+                    example: "The Pragmatic Programmer"
+                  cover_url:
+                    type: string
+                    example: "https://example.com/cover.jpg"
+      required:
+        - collection_id
+        - user_id
+        - name
+
+    CustomCollectionInput:
+      type: object
+      required:
+        - user_id
+        - name
+      properties:
+        user_id:
+          type: integer
+          example: 12
+        name:
+          type: string
+          example: "My Favorite Books"
+        description:
+          type: string
+          example: "A collection of my favorite books."
+
+    CustomCollectionUpdateInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "Updated Collection Name"
+        description:
+          type: string
+          example: "Updated description for the collection."
+
+    CollectionBook:
+      type: object
+      properties:
+        collection_id:
+          type: integer
+          example: 101
+        book_id:
+          type: integer
+          example: 45
+        custom_collections:
+          $ref: '#/components/schemas/CustomCollection'
+        books:
+          type: object
+          properties:
+            book_id:
+              type: integer
+              example: 45
+            title:
+              type: string
+              example: "The Pragmatic Programmer"
+            cover_url:
+              type: string
+              example: "https://example.com/cover.jpg"
+      required:
+        - collection_id
+        - book_id
+
+  responses:
+    NotFound:
+      description: ไม่พบ resource ที่ร้องขอ
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Resource not found"
+    InternalError:
+      description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Internal server error. Please try again later"
+    BadRequest:
+      description: รูปแบบข้อมูลไม่ถูกต้อง
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "รูปแบบข้อมูลไม่ถูกต้อง"
+    Conflict:
+      description: ข้อมูลซ้ำหรือมีข้อพิพาท
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "ข้อมูลซ้ำหรือมีข้อพิพาท"

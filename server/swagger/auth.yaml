@@ -1,0 +1,131 @@
+tags:
+  - name: Auth
+    description: Endpoints สำหรับการยืนยันตัวตนผู้ใช้
+
+# ------------------------------------------------------------------
+paths:
+  /auth/register:
+    post:
+      security: []
+      tags: [Auth]
+      summary: ลงทะเบียนผู้ใช้งานใหม่
+      description: สร้างผู้ใช้ใหม่ด้วย username, email และ password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegisterInput'
+      responses:
+        '201':
+          description: ลงทะเบียนสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string,  example: "User registered successfully" }
+                  data:    { $ref: '#/components/schemas/User' }
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /auth/login:
+    post:
+      security: []
+      tags: [Auth]
+      summary: เข้าสู่ระบบผู้ใช้งาน
+      description: ตรวจสอบ username และ password แล้วคืน JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginInput'
+      responses:
+        '200':
+          description: เข้าสู่ระบบสำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string,  example: "Login successfully" }
+                  token:   { type: string,  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+# ------------------------------------------------------------------
+components:
+  schemas:
+    # ---------- output ----------
+    User:
+      type: object
+      properties:
+        user_id:  { type: integer, example: 12 }
+        username: { type: string,  example: "john_doe" }
+        email:    { type: string,  format: email, example: "john@example.com" }
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-06-12T12:34:56Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-06-12T12:34:56Z"
+
+    # ---------- input ----------
+    UserRegisterInput:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+          description: ชื่อผู้ใช้งาน (unique)
+          example: "john_doe"
+        email:
+          type: string
+          format: email
+          description: อีเมล (unique)
+          example: "john@example.com"
+        password:
+          type: string
+          description: รหัสผ่าน
+          example: "secret123"
+
+    UserLoginInput:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: "john_doe"
+        password:
+          type: string
+          example: "secret123"
+
+  responses:
+    Conflict:
+      description: username หรือ email ซ้ำในระบบ
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: false }
+              message: { type: string,  example: "ชื่อ username john_doe มีอยู่ในระบบแล้ว" }
+
+    Unauthorized:
+      description: Username หรือ password ไม่ถูกต้อง
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: false }
+              message: { type: string,  example: "ข้อมูล username john_doe ไม่ถูกต้อง" }

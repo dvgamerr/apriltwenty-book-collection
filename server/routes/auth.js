@@ -55,6 +55,7 @@ routerAuth.post("/register", postUserValidation, async (req, res) => {
         });
     }
 });
+
 routerAuth.post("/login", loginValidation, async (req, res) => {
     //1 access request
     const { username, password } = req.body;

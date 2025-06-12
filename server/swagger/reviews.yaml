@@ -1,0 +1,280 @@
+tags:
+  - name: Reviews
+    description: Endpoints สำหรับจัดการ Reviews ของหนังสือ
+
+paths:
+  /reviews:
+    post:
+      tags: [Reviews]
+      summary: สร้าง Review ใหม่
+      description: สร้างรีวิวหนังสือด้วย book_id, user_id, rating และ comment โดยตรวจสอบความตรงกันของ user_id จาก token กับ user_id ใน body
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewInput'
+      responses:
+        '201':
+          description: Create review successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Create review successfully"
+                  data:
+                    $ref: '#/components/schemas/Review'
+        '403':
+          description: "User ID mismatch: Access denied"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "User ID mismatch: Access denied"
+        '404':
+          description: User not found or Book not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "User not found"  # หรือ "Book not found" ตามกรณี
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    get:
+      tags: [Reviews]
+      summary: ดึงรายชื่อ Reviews ตาม query parameters
+      description: ดึงข้อมูล reviews โดยสามารถกรองด้วย user_id หรือ book_id และรองรับ pagination (page, limit)
+      parameters:
+        - in: query
+          name: user_id
+          schema:
+            type: integer
+          description: Filter reviews โดย user_id
+        - in: query
+          name: book_id
+          schema:
+            type: integer
+          description: Filter reviews โดย book_id
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: หน้าที่ต้องการ (สำหรับแบ่งหน้า)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+          description: จำนวนรายการต่อหน้า
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  count:
+                    type: integer
+                    example: 10
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /reviews/{reviewId}:
+    parameters:
+      - in: path
+        name: reviewId
+        required: true
+        schema:
+          type: integer
+        description: ID ของ review
+    get:
+      tags: [Reviews]
+      summary: ดึงข้อมูล Review ตาม reviewId
+      responses:
+        '200':
+          description: สำเร็จ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Review'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [Reviews]
+      summary: อัปเดตข้อมูล Review
+      description: อัปเดต rating และ comment สำหรับ review ที่ระบุโดย reviewId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewUpdateInput'
+      responses:
+        '200':
+          description: Update review successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Update review successfully"
+                  data:
+                    $ref: '#/components/schemas/Review'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Reviews]
+      summary: ลบ Review
+      responses:
+        '200':
+          description: Delete review successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Delete review successfully"
+                  data:
+                    $ref: '#/components/schemas/Review'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    Review:
+      type: object
+      properties:
+        review_id:
+          type: integer
+          example: 25
+        book_id:
+          type: integer
+          example: 12
+        user_id:
+          type: integer
+          example: 7
+        rating:
+          type: integer
+          example: 4
+        comment:
+          type: string
+          example: "Very informative book!"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-06-12T12:34:56Z"
+      required: [review_id, book_id, user_id, rating]
+
+    ReviewInput:
+      type: object
+      required:
+        - book_id
+        - user_id
+        - rating
+      properties:
+        book_id:
+          type: integer
+          example: 12
+        user_id:
+          type: integer
+          example: 7
+        rating:
+          type: integer
+          description: คะแนนรีวิว
+          example: 4
+        comment:
+          type: string
+          description: ความคิดเห็นเพิ่มเติมเกี่ยวกับหนังสือ
+          example: "Very informative book!"
+
+    ReviewUpdateInput:
+      type: object
+      required:
+        - rating
+      properties:
+        rating:
+          type: integer
+          description: Rating ใหม่
+          example: 5
+        comment:
+          type: string
+          description: ความคิดเห็นใหม่
+          example: "Updated review comment."
+
+  responses:
+    NotFound:
+      description: ไม่พบ resource ที่ร้องขอ
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Review not found"
+    InternalError:
+      description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Internal server error. Please try again later"

@@ -1,0 +1,43 @@
+components:
+  responses:
+    BadRequest:
+      description: รูปแบบข้อมูลไม่ถูกต้อง
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Bad request"
+
+    NotFound:
+      description: ไม่พบ resource ที่ร้องขอ
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Resource not found"
+
+    InternalError:
+      description: เกิดข้อผิดพลาดในเซิร์ฟเวอร์
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              message:
+                type: string
+                example: "Internal server error. Please try again later."
