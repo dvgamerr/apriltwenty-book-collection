@@ -22,3 +22,7 @@ SECRET_KEY = lTY7AOgyQ8+ViEIAjijB/3BDlmsoKxQzcaWK9nSMzkCRxMujN3vr6B+d1hAWh/RgXSS
 
 5 รัน npx prisma generate และหากมีการแก้ไขข้อมูล เกี่ยวกับ database หรือ prisma ให้รัน อีกครั้ง
 6 เปิดการทำงาน server ด้วย npm run start
+
+เพิ่มเติมติดตั้ง swagger เพื่อใช้งาน api document ด้วย swagger user_id
+1 npm install swagger-jsdoc swagger-ui-express
+2 เปิด server แล้วเข้า brower เข้าไปที่ localhost:4000/api-docs
