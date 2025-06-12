@@ -3,16 +3,6 @@ import prisma from "../app.js";
 import { validateId, validateQuery, usernameValidation, passwordValidation, emailValidation } from "../middleware/validateData.js"
 import bcrypt from "bcrypt";
 
-/**
- * @swagger
- * /users:
- *   get:
- *     summary: ดึงข้อมูลผู้ใช้ทั้งหมด
- *     responses:
- *       200:
- *         description: สำเร็จ
- */
-
 const routerUsers = Router();
 
 routerUsers.get("/:userId", validateId("userId"), async (req, res) => {

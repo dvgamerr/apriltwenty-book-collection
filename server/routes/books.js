@@ -4,6 +4,59 @@ import prisma from "../app.js";
 
 const routerBooks = Router();
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Book:
+ *       type: object
+ *       properties:
+ *         book_id:
+ *           type: integer
+ *         title:
+ *           type: string
+ *         description:
+ *           type: string
+ *         isbn:
+ *           type: string
+ *         publisher:
+ *           type: string
+ *         published_year:
+ *           type: integer
+ *         cover_url:
+ *           type: string
+ *         author:
+ *           type: array
+ *           items:
+ *             type: string
+ *         category:
+ *           type: array
+ *           items:
+ *             type: string
+ */
+
+/**
+ * @swagger
+ * /books/{bookId}:
+ *   get:
+ *     summary: ดึงข้อมูลหนังสือตาม bookId
+ *     parameters:
+ *       - in: path
+ *         name: bookId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: สำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Book'
+ *       404:
+ *         description: Book not found
+ */
+
 routerBooks.get("/:bookId", async (req, res) => {
     //1 access body and req
     const bookIdFromClient = req.params.bookId;
@@ -55,6 +108,36 @@ routerBooks.get("/:bookId", async (req, res) => {
         });
     }
 });
+
+/**
+ * @swagger
+ * /books:
+ *   get:
+ *     summary: ดึงข้อมูลหนังสือทั้งหมดตามตัวกรอง
+ *     parameters:
+ *       - in: query
+ *         name: name
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: author
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: สำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Book'
+ */
+
 routerBooks.get("/", async(req, res) => {
     //1 access req
     const { name, category, author } = req.query;
@@ -113,6 +196,92 @@ routerBooks.get("/", async(req, res) => {
     }
 
 });
+
+/**
+ * @swagger
+ * /books:
+ *   post:
+ *     summary: สร้างหนังสือใหม่
+ *     description: เพิ่มหนังสือใหม่ด้วยข้อมูลที่ระบุใน request body
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: ชื่อหนังสือ
+ *                 example: "ชื่อหนังสือ"
+ *               description:
+ *                 type: string
+ *                 description: รายละเอียดหนังสือ
+ *                 example: "รายละเอียดหนังสือ"
+ *               isbn:
+ *                 type: string
+ *                 description: ISBN ของหนังสือ
+ *                 example: "978-3-16-148410-0"
+ *               publisher:
+ *                 type: string
+ *                 description: สำนักพิมพ์ของหนังสือ
+ *                 example: "สำนักพิมพ์ตัวอย่าง"
+ *               published_year:
+ *                 type: integer
+ *                 format: int32
+ *                 description: ปีที่พิมพ์หนังสือ
+ *                 example: 2020
+ *               cover_url:
+ *                 type: string
+ *                 description: URL รูปปกของหนังสือ
+ *                 example: "http://example.com/cover.jpg"
+ *               author_ids:
+ *                 type: array
+ *                 description: รายการ ID หรือชื่อของผู้แต่ง
+ *                 items:
+ *                   oneOf:
+ *                     - type: integer
+ *                     - type: string
+ *                 example: [1, "ผู้แต่งตัวอย่าง"]
+ *               category_ids:
+ *                 type: array
+ *                 description: รายการ ID หรือชื่อของประเภทหนังสือ
+ *                 items:
+ *                   oneOf:
+ *                     - type: integer
+ *                     - type: string
+ *                 example: [1, "นิยาย"]
+ *     responses:
+ *       201:
+ *         description: เพิ่มหนังสือใหม่สำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Add new book successfully"
+ *                 newbook:
+ *                   $ref: '#/components/schemas/Book'
+ *       500:
+ *         description: มีข้อผิดพลาดภายในเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้งในภายหลัง
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error. Please try again later."
+ */
+
 routerBooks.post("/", postBookValidation, async (req, res) => {
     //1 access req and body
     const { 
@@ -201,6 +370,126 @@ routerBooks.post("/", postBookValidation, async (req, res) => {
     }
 
 });
+
+/**
+ * @swagger
+ * /books/{bookId}:
+ *   put:
+ *     summary: อัปเดตข้อมูลหนังสือ
+ *     description: แก้ไขรายละเอียดหนังสือที่มีอยู่ตาม bookId
+ *     parameters:
+ *       - in: path
+ *         name: bookId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID ของหนังสือที่ต้องการอัปเดต
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: ชื่อหนังสือ
+ *                 example: "ชื่อหนังสือที่แก้ไข"
+ *               description:
+ *                 type: string
+ *                 description: รายละเอียดของหนังสือ
+ *                 example: "รายละเอียดใหม่"
+ *               isbn:
+ *                 type: string
+ *                 description: ISBN ของหนังสือ
+ *                 example: "978-3-16-148410-0"
+ *               publisher:
+ *                 type: string
+ *                 description: สำนักพิมพ์ของหนังสือ
+ *                 example: "สำนักพิมพ์ใหม่"
+ *               published_year:
+ *                 type: integer
+ *                 format: int32
+ *                 description: ปีที่พิมพ์หนังสือ
+ *                 example: 2021
+ *               cover_url:
+ *                 type: string
+ *                 description: URL รูปปกของหนังสือ
+ *                 example: "http://example.com/new-cover.jpg"
+ *               author_ids:
+ *                 type: array
+ *                 description: รายการ ID หรือชื่อของผู้แต่ง
+ *                 items:
+ *                   oneOf:
+ *                     - type: integer
+ *                     - type: string
+ *                 example: [2, "ผู้แต่งใหม่"]
+ *               category_ids:
+ *                 type: array
+ *                 description: รายการ ID หรือชื่อของประเภทหนังสือ
+ *                 items:
+ *                   oneOf:
+ *                     - type: integer
+ *                     - type: string
+ *                 example: [3, "วรรณกรรม"]
+ *     responses:
+ *       200:
+ *         description: อัปเดตข้อมูลหนังสือสำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Update book data successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Book'
+ *       400:
+ *         description: รูปแบบข้อมูล bookId ไม่ถูกต้อง
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "รูปแบบข้อมูล bookId ไม่ถูกต้อง"
+ *       404:
+ *         description: ไม่พบหนังสือที่ต้องการแก้ไข
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Book not found"
+ *       500:
+ *         description: เกิดข้อผิดพลาดในเซิร์ฟเวอร์
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error. Please try again later."
+ */
+
+
 routerBooks.put("/:bookId", postBookValidation, async (req, res) => {
     //1 access req
     const bookIdFromClient = req.params.bookId;
@@ -308,6 +597,77 @@ routerBooks.put("/:bookId", postBookValidation, async (req, res) => {
         })
     }
 });
+
+/**
+ * @swagger
+ * /books/{bookId}:
+ *   delete:
+ *     summary: ลบหนังสือตาม bookId
+ *     description: ลบข้อมูลหนังสือที่มีอยู่โดยใช้ bookId
+ *     parameters:
+ *       - in: path
+ *         name: bookId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID ของหนังสือที่ต้องการลบ
+ *     responses:
+ *       200:
+ *         description: ลบหนังสือสำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Delete book id: 1 successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Book'
+ *       400:
+ *         description: รูปแบบข้อมูล bookId ไม่ถูกต้อง
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "รูปแบบข้อมูล book id ไม่ถูกต้อง"
+ *       404:
+ *         description: ไม่พบหนังสือที่ต้องการลบ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "ข้อมูล bookId ไม่ถูกต้อง"
+ *       500:
+ *         description: เกิดข้อผิดพลาดในเซิร์ฟเวอร์
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal server error. Please try again later."
+ */
+
 routerBooks.delete("/:bookId", async (req, res) => {
     //1 access request
     const bookIdFromClient = req.params.bookId;

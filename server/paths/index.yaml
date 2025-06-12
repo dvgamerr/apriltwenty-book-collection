@@ -1,0 +1,13 @@
+openapi: "3.0.0"
+info:
+  title: "User Book API"
+  version: "1.0.0"
+  description: "API สำหรับจัดการหนังสือของผู้ใช้"
+paths:
+  /users:
+    $ref: "./paths/users.yaml"
+  /books:
+    $ref: "./paths/books.yaml"
+components:
+  schemas:
+    $ref: "./path/definitions.yaml"
