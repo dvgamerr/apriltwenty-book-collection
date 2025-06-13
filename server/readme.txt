@@ -21,6 +21,12 @@ SECRET_KEY = lTY7AOgyQ8+ViEIAjijB/3BDlmsoKxQzcaWK9nSMzkCRxMujN3vr6B+d1hAWh/RgXSS
 
 
 5 รัน npx prisma generate และหากมีการแก้ไขข้อมูล เกี่ยวกับ database หรือ prisma ให้รัน อีกครั้ง
+
+**
+เพิ่มการติดตั้ง cors เพิ่มเชื่อมต่อกับ frontend
+npm install cors
+
+**
 6 เปิดการทำงาน server ด้วย npm run start
 
 เพิ่มเติมติดตั้ง swagger เพื่อใช้งาน api document ด้วย swagger user_id

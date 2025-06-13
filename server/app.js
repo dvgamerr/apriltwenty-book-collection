@@ -10,6 +10,7 @@ import routerUserBooks from "./routes/user-books.js";
 import routerCustomCollections from "./routes/custom-collections.js";
 import routerUserProfile from "./routes/user-profile.js";
 import swaggerSetup from "./swagger.js";
+import cors from "cors";
 
 const prisma = new PrismaClient();
 
@@ -19,6 +20,7 @@ async function init() {
     const PORT = 4000;
 
     app.use(express.json());
+    app.use(cors());
     app.use("/books", routerBooks);
     app.use("/authors", routerAuthors);
     app.use("/categories", routerCategories);
