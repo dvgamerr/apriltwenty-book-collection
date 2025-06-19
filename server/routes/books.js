@@ -129,6 +129,15 @@ routerBooks.post("/", postBookValidation, async (req, res) => {
     } = req.body;
     try {
         //2 sql statment
+        const collision = await prisma.books.findUnique({
+            where: { isbn: isbn }
+        });
+        if (collision) {
+            return res.status(200).json({
+                "success": false,
+                "message": "เลข isbn " + collision.isbn + " มีอยู่ในระบบแล้ว"
+            });
+        }
         const result = await prisma.books.create(
             {
                 data: {
