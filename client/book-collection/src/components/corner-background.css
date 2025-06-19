@@ -1,0 +1,10 @@
+.green-corner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 500px; /* ปรับตามขนาดที่ต้องการ */
+  height: 250px;
+  background-color: #4CAF50; /* เขียวแบบสดใส */
+  border-bottom-left-radius: 120px;
+  z-index: -1; /* ไปอยู่หลังเนื้อหาอื่น */
+}
