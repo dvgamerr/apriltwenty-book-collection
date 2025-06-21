@@ -1,0 +1,11 @@
+header {
+    display: flex;
+    width: 95%;
+    height: 60px;
+    justify-content: space-betweenflw;
+    justify-self: center;
+    padding: 10px 20px;
+    border-radius: 50px;
+    margin: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}

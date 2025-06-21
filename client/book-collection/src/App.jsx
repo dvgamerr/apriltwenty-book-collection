@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './App.css'
 import GreenCorner from './components/corner-background.jsx'
 import HomePage from './pages/Home.jsx'
+import HeaderNavBar from './components/header-nav-bar.jsx';
 
 function App() {
 
@@ -10,6 +11,7 @@ function App() {
       <GreenCorner />
 
       <BrowserRouter>
+        <HeaderNavBar />
         <Routes>
           <Route path='/' element={ <HomePage /> } /> 
         </Routes>
