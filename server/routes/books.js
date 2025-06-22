@@ -133,7 +133,7 @@ routerBooks.post("/", postBookValidation, async (req, res) => {
             where: { isbn: isbn }
         });
         if (collision) {
-            return res.status(200).json({
+            return res.status(409).json({
                 "success": false,
                 "message": "เลข isbn " + collision.isbn + " มีอยู่ในระบบแล้ว"
             });
@@ -235,6 +235,18 @@ routerBooks.put("/:bookId", postBookValidation, async (req, res) => {
     } = req.body;
     //2 sql
     try {
+        const collision = await prisma.books.findFirst({
+            where: {
+                isbn: isbn,
+                NOT: { book_id: bookIdFromClientInt }
+            }
+        });
+        if (collision) {
+            return res.status(409).json({
+                "success": false,
+                "message": "เลข isbn " + collision.isbn + " มีอยู่ในระบบแล้ว"
+            });
+        }
         const [ deleteAuthor, deleteCategory, updateBook ] = await prisma.$transaction([
             prisma.book_authors.deleteMany({
                 where: { book_id: bookIdFromClientInt }
@@ -314,6 +326,7 @@ routerBooks.put("/:bookId", postBookValidation, async (req, res) => {
             "data": updateBook
         });
     } catch (error) {
+                console.error("error: " + error);
         return res.status(500).json({
             "success": false,
             "message": "Internal server error. Please try again later"
