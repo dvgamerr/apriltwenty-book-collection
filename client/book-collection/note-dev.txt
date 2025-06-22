@@ -1,0 +1,3 @@
+ภาพโดย <a href="https://pixabay.com/th/users/congerdesign-509903/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=2304389">congerdesign</a> จาก <a href="https://pixabay.com/th//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=2304389">Pixabay</a>
+
+npm install react-slick slick-carousel

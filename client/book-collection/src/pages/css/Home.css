@@ -1,11 +1,65 @@
-header {
+.hero-section {
     display: flex;
-    width: 95%;
-    height: 60px;
-    justify-content: space-betweenflw;
-    justify-self: center;
-    padding: 10px 20px;
-    border-radius: 50px;
-    margin: 10px;
+    flex-direction: row;
+    position: relative;
+    height: 400px;
+    margin: 30px;
+    width: auto;
+    border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    gap: 10px;
 }
+
+.hero-img-box {
+    height: 350px;
+    width: 50%;
+}
+
+.hero-img {
+    position: absolute;
+    margin-top: 50px;
+    width: 350px;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.img-front {
+  top: 30px;
+  left: 100px;
+  transform: rotate(-6deg);
+  z-index: 2;
+}
+
+.img-back {
+  top: 0px;
+  left: 200px;
+  transform: rotate(6deg);
+  z-index: 1;
+}
+
+.info-card {
+    height: 350px;
+    width: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    margin: 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #aaa;
+}
+
+.slider-box {
+    height: 300px;
+    width: 90%;
+}
+.info-card img {
+    height: 270px;
+    width: 100%;
+    border-radius: 10px;
+}
+
