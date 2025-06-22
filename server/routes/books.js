@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { postBookValidation } from "../middleware/validateData.js";
+import { postBookValidation, validateQuery } from "../middleware/validateData.js";
 import prisma from "../app.js";
 
 const routerBooks = Router();
@@ -56,9 +56,9 @@ routerBooks.get("/:bookId", async (req, res) => {
     }
 });
 
-routerBooks.get("/", async(req, res) => {
+routerBooks.get("/", validateQuery, async(req, res) => {
     //1 access req
-    const { name, category, author } = req.query;
+    const { name, category, author, page, limit } = req.query;
     let filters = {};
     if (name) {
         filters.title = { contains: name, mode: "insensitive" }
@@ -77,15 +77,20 @@ routerBooks.get("/", async(req, res) => {
             }
         }
     }
+    let queryOption = { where: filters };
+    if (page !== undefined && limit !== undefined) {
+        const pageInt = parseInt(page, 10);
+        const limitInt = parseInt(limit, 10);
+        queryOption.skip = (pageInt -1) * limitInt;
+        queryOption.take = limitInt;
+    }
     //2 sql
     try {
-        const result = await prisma.books.findMany({
-            where: filters,
-            include: {
+        queryOption.include = {
                 book_authors: { include: { authors: true }},
                 book_categories: { include: { categories: true }}
-            }
-        })
+            };
+        const result = await prisma.books.findMany(queryOption)
         //3 res
         const simpleResult = result.map((data) => {
             return {
