@@ -14,7 +14,7 @@
 .book-detail-box {
     display: flex;
     flex-direction: row;
-    height: 300px;
+    height: fit-content;
     width: auto;
     margin: 20px;
     border-radius: 10px;
@@ -40,4 +40,34 @@
 }
 .book-detail {
     width: 450px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.book-detail-title {
+    display: flex;
+    align-items: flex-start;
+}
+
+.book-detail-label {
+  margin-right: 8px;
+  flex-shrink: 0;
+    font-weight: 600;
+  color: #333;
+
+
+}
+
+.book-detail-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.detail-item {
+    background-color: #f3f3f3;
+    border-radius: 10px;
+    padding: 4px 8px;
 }

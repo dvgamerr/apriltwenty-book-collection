@@ -39,9 +39,66 @@ function BookInfo() {
                     <img src={book.cover_url} alt="hero-img" onError={(e) => { e.currentTarget.src=noImg }}/>
                 </div>
                 <div className='book-detail'>
-                    <h3>ชื่อหนังสือ</h3>
-                    <p>ผู้เขียน</p>
-                    <p>หมวดหมู่</p>
+                    <div className='book-detail-title'>
+                        <div className='book-detail-label'>ชื่อหนังสือ: </div>
+                        <div>{book.title}</div>
+                    </div>
+                    <div className='book-detail-title'>
+                        <div className='book-detail-label'>ISBN: </div>
+                        <div>{book.isbn}</div>
+                    </div>
+                    <div className='book-detail-title'>
+                        <div className='book-detail-label'>Publisher: </div>
+                        <div>{book.publisher}</div>
+                    </div>
+                    <div className='book-detail-title'>
+                        <div className='book-detail-label'>วันที่ตีพิมพ์: </div>
+                        <div>{book.published_year}</div>
+                    </div>
+                    <div className='book-detail-title'>
+                        <div className='book-detail-label'>วันที่ลงข้อมูล: </div>
+                        <div>{new Date(book.created_at).toLocaleDateString("th-TH", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric"
+                        })}</div>
+                    </div>
+                    <div className='book-detail-title'>
+                        <div className='book-detail-label'>แก้ไขล่าสุด: </div>
+                        <div>{new Date(book.updated_at).toLocaleDateString("th-TH", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric"
+                        })}</div>
+                    </div>      
+                    <div className='book-detail-title'>
+                        <div className='book-detail-label'>หมวดหมู่: </div>
+                        <div className='book-detail-info'>
+                        {
+                            book.category.map((category, index) => {
+                                return (
+                                    <div key={index} className='detail-item'>{category}</div>
+                                )
+                            })
+                        }
+                        </div>
+                    </div>
+                    <div className='book-detail-title'>
+                        <div className='book-detail-label'>ผู้เขียน: </div>
+                        <div className='book-detail-info'>
+                        {
+                            book.author.map((category, index) => {
+                                return (
+                                    <div key={index} className='detail-item'>{category}</div>
+                                )
+                            })
+                        }
+                        </div>
+                    </div>
+                    <div className='book-detail-title'>
+                        <div className='book-detail-label'>รายละเอียด: </div>
+                        <div>{book.description}</div>
+                    </div>
                 </div>
             </div>
         </div>
