@@ -4,6 +4,7 @@ import { getBooks } from '../apis/books';
 import './css/BookInfo.css'
 import { useParams } from 'react-router-dom';
 import noImg from "../images/No_Image_Available.jpg";
+import { Link } from "react-router-dom";
 
 function BookInfo() {
     const [ book, setBook ] = useState(null);
@@ -77,7 +78,9 @@ function BookInfo() {
                         {
                             book.category.map((category, index) => {
                                 return (
-                                    <div key={index} className='detail-item'>{category}</div>
+                                    <Link to={`/books?category=${category}`}>
+                                        <div key={index} className='detail-item'>{category}</div>
+                                    </Link>
                                 )
                             })
                         }
@@ -87,9 +90,11 @@ function BookInfo() {
                         <div className='book-detail-label'>ผู้เขียน: </div>
                         <div className='book-detail-info'>
                         {
-                            book.author.map((category, index) => {
+                            book.author.map((author, index) => {
                                 return (
-                                    <div key={index} className='detail-item'>{category}</div>
+                                    <Link to={`/books?author=${author}`} >
+                                        <div key={index} className='detail-item'>{author}</div>
+                                    </Link>
                                 )
                             })
                         }
