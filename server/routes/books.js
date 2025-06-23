@@ -38,6 +38,8 @@ routerBooks.get("/:bookId", async (req, res) => {
         "publisher": result.publisher,
         "published_year": result.published_year,
         "cover_url": result.cover_url,
+        "created_at": result.created_at,
+        "updated_at": result.updated_at,
         "author": result.book_authors.map((arr_author) => {
             return arr_author.authors.name}),
         "category": result.book_categories.map((arr_category) => {
@@ -101,6 +103,8 @@ routerBooks.get("/", validateQuery, async(req, res) => {
             "publisher": data.publisher,
             "published_year": data.published_year,
             "cover_url": data.cover_url,
+            "created_at": data.created_at,
+            "updated_at": data.updated_at,
             "author": data.book_authors.map((arr_author) => {
                 return arr_author.authors.name}),
             "category": data.book_categories.map((arr_category) => {
