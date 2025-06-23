@@ -3,6 +3,7 @@ import './App.css'
 import GreenCorner from './components/corner-background.jsx'
 import HomePage from './pages/Home.jsx'
 import HeaderNavBar from './components/header-nav-bar.jsx';
+import BookInfoPage from './pages/BookInfoPage.jsx';
 
 function App() {
 
@@ -14,6 +15,7 @@ function App() {
         <HeaderNavBar />
         <Routes>
           <Route path='/' element={ <HomePage /> } /> 
+          <Route path='/books/:id' element={ <BookInfoPage /> } />
         </Routes>
       </BrowserRouter>
     </div>

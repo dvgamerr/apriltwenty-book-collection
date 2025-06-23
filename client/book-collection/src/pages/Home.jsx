@@ -15,7 +15,10 @@ function HomePage() {
     useEffect(() => {
         async function fetchBook() {
             try {
-                const response = await getBooks();
+              const clientData = {};
+              clientData.params = ""
+              clientData.query = "?page=1&&limit=10";
+                const response = await getBooks(clientData);
 
                 if (response.data && response.data.success) {
                     setBooks(response.data.data);

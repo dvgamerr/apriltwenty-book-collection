@@ -1,0 +1,10 @@
+.book-info-page {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    margin: 30px;
+    width: 95%;
+    gap: 10px;
+    justify-content: center;
+    justify-self: center;
+}

@@ -15,7 +15,6 @@ function BookSlider({ books }) {
         slidesToShow: 1,
         slidesToScroll: 1
     };
-    console.log("books ไม่ใช่อาร์เรย์หรือไม่มีข้อมูล:", books);
     if (!books || books.length === 0) {
     console.log("books ไม่ใช่อาร์เรย์หรือไม่มีข้อมูล:", books);
     return <div>ไม่พบหนังสือที่จะแสดง</div>;
@@ -28,8 +27,7 @@ function BookSlider({ books }) {
                 {books.map((book) => {
                     return (
                         <div key={book.book_id} className="slider-item">
-                            {console.log(book.book_id)}
-                            <Link to={`/book-info/${book.book_id}`}>
+                            <Link to={`/books/${book.book_id}`}>
                                 <img src={book.cover_url} alt={book.title} className="book-cover" onError={(e) => {e.currentTarget.src = noImg}} />
                             {book.title}
                             </Link>
