@@ -50,7 +50,8 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    background-color: #aaa;
+     background-color: rgba(129, 209, 196, 0.664);
+    z-index: 2;
 }
 
 .slider-box {
