@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { register } from "../apis/register";
+import { useNavigate  } from "react-router-dom";
 
 function RegisterComponent() {
+    const navigate = useNavigate();
     const [ username, setUsername ] = useState('');
     const [ password, setPassword ] = useState('');
     const [ confirmPassword, setConfirmPassword ] = useState('');
     const [ email, setEmail ] = useState('');
-    const [ error, setError ] = useState('');
+    const [ error, setError ] = useState(null);
+    const [ success, setSuccess ] = useState(false);
 
     const handleRegister = async (event) => {
-        event.preventDefault;
+        event.preventDefault();
         if (password !== confirmPassword) {
             return setError("รหัสผ่านไม่ตรงกัน")
         }
@@ -20,11 +23,19 @@ function RegisterComponent() {
             "email": email
         }
         try {
-            const response = register(clientData);
-            
+            const response = await register(clientData);
+            if (response.data && response.data.success) {
+                setSuccess(true);
+                navigate("/login");
+            } else {
+                console.log(response.data.message)
+                const message = response.data?.message || "เกิดข้อผิดพลาดในการลงทะเบียน";
+                setError(message);
+            }
         } catch (error) {
             console.error(error);
-            setError("เกิดข้อผิดพลาดในการลงทะเบียน")
+            const message = error.response?.data?.message || "เกิดข้อผิดพลาดในการลงทะเบียน"
+            setError(message)
         }
     }
         
@@ -33,6 +44,8 @@ function RegisterComponent() {
     return (
         
         <div className="register-contrainer">
+            {error && <div className="error-message">{error}</div>}
+            {success && <div>ลงทะเบียนสำเร็จ กรุณาเข้าสู่ระบบ</div>}
             <form onSubmit={handleRegister}>
                 <div className="input-box">
                     <label>Username:</label>
@@ -64,7 +77,7 @@ function RegisterComponent() {
                         />
                     </div>
                     {error==="รหัสผ่านไม่ตรงกัน" && (
-                        <p>{error}</p>
+                        <div className="error-message">{error}</div>
                     )}
                 </div>
                 <div className="input-box">
