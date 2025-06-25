@@ -27,7 +27,8 @@ function RegisterComponent() {
             const response = await register(clientData);
             if (response.data && response.data.success) {
                 setSuccess(true);
-                navigate("/login");
+                setError("");
+                navigate("/auth/login");
             } else {
                 console.log(response.data.message)
                 const message = response.data?.message || "เกิดข้อผิดพลาดในการลงทะเบียน";
@@ -78,9 +79,9 @@ function RegisterComponent() {
                     </div>
 
                 </div>
-                                    {error==="รหัสผ่านไม่ตรงกัน" && (
+                {error==="รหัสผ่านไม่ตรงกัน" && (
                         <div className="error-message">*{error}</div>
-                    )}
+                )}
                 <div className="input-box">
                     <label>Email:</label>
                     <div className="input">

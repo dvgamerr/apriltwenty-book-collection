@@ -5,6 +5,7 @@ import HomePage from './pages/Home.jsx'
 import HeaderNavBar from './components/header-nav-bar.jsx';
 import BookInfoPage from './pages/BookInfoPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
 
 function App() {
 
@@ -17,7 +18,8 @@ function App() {
         <Routes>
           <Route path='/' element={ <HomePage /> } /> 
           <Route path='/books/:id' element={ <BookInfoPage /> } />
-          <Route path='/auth/register' element={ <RegisterPage /> } /> 
+          <Route path='/auth/register' element={ <RegisterPage /> } />
+          <Route path='/auth/login' element={ <LoginPage />} />
         </Routes>
       </BrowserRouter>
     </div>
