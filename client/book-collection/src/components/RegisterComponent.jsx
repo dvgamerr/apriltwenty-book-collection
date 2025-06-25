@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { register } from "../apis/register";
 import { useNavigate  } from "react-router-dom";
+import "./css/RegisterComponent.css";
 
 function RegisterComponent() {
     const navigate = useNavigate();
@@ -38,14 +39,13 @@ function RegisterComponent() {
             setError(message)
         }
     }
-        
-    
-    
+
     return (
         
         <div className="register-contrainer">
-            {error && <div className="error-message">{error}</div>}
-            {success && <div>ลงทะเบียนสำเร็จ กรุณาเข้าสู่ระบบ</div>}
+            <h1>Register</h1>
+            {error && error != "รหัสผ่านไม่ตรงกัน" && <div className="error-message">*{error}</div>}
+            {success && <div className="success-message">ลงทะเบียนสำเร็จ กรุณาเข้าสู่ระบบ</div>}
             <form onSubmit={handleRegister}>
                 <div className="input-box">
                     <label>Username:</label>
@@ -76,10 +76,11 @@ function RegisterComponent() {
                             onChange={(event) => setConfirmPassword(event.target.value)}
                         />
                     </div>
-                    {error==="รหัสผ่านไม่ตรงกัน" && (
-                        <div className="error-message">{error}</div>
-                    )}
+
                 </div>
+                                    {error==="รหัสผ่านไม่ตรงกัน" && (
+                        <div className="error-message">*{error}</div>
+                    )}
                 <div className="input-box">
                     <label>Email:</label>
                     <div className="input">

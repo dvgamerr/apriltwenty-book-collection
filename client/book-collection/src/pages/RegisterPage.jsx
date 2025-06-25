@@ -1,4 +1,5 @@
 import RegisterComponent from "../components/RegisterComponent";
+import "./css/RegisterPage.css";
 
 function RegisterPage() {
     return (
