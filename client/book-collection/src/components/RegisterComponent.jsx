@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { register } from "../apis/register";
 import { useNavigate  } from "react-router-dom";
-import "./css/RegisterComponent.css";
+import "./css/ContentComponent.css";
+import { Link } from "react-router-dom";
 
 function RegisterComponent() {
     const navigate = useNavigate();
@@ -43,56 +44,50 @@ function RegisterComponent() {
 
     return (
         
-        <div className="register-contrainer">
+        <div className="content-contrainer">
             <h1>Register</h1>
             {error && error != "รหัสผ่านไม่ตรงกัน" && <div className="error-message">*{error}</div>}
             {success && <div className="success-message">ลงทะเบียนสำเร็จ กรุณาเข้าสู่ระบบ</div>}
             <form onSubmit={handleRegister}>
-                <div className="input-box">
-                    <label>Username:</label>
-                    <div className="input">
+                <div className="input-wrapper">
+                    <div className="input-box">
+                        <label>Username:</label>
                         <input 
                             type="text"
                             value={username}
                             onChange={(event) => setUsername(event.target.value)}
                         />
                     </div>
-                </div>
-                <div className="input-box">
-                    <label>Password:</label>
-                    <div className="input">
+                    <div className="input-box">
+                        <label>Password:</label>
                         <input 
                             type="password"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
                         />
                     </div>
-                </div>
-                <div className="input-box">
-                    <label>Confirm password:</label>
-                    <div className="input">
+                    <div className="input-box">
+                        <label>Confirm password:</label>
                         <input 
                             type="password"
                             value={confirmPassword}
                             onChange={(event) => setConfirmPassword(event.target.value)}
                         />
                     </div>
-
-                </div>
-                {error==="รหัสผ่านไม่ตรงกัน" && (
-                        <div className="error-message">*{error}</div>
-                )}
-                <div className="input-box">
-                    <label>Email:</label>
-                    <div className="input">
+                    {error==="รหัสผ่านไม่ตรงกัน" && (
+                            <div className="error-message">*{error}</div>
+                    )}
+                    <div className="input-box">
+                        <label>Email:</label>
                         <input 
                             type="email"
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
                         />
                     </div>
+                    <button type="submit">Register</button>
+                    <div>หากมีบัญชีผู้ใช้แล้ว คุณสามารถ <Link to='/auth/login'>เข้าสู่ระบบ</Link></div>
                 </div>
-                <button type="submit">Register</button>
             </form>
         </div>
     )

@@ -3,7 +3,7 @@ import LoginComponent from "../components/LoginComponent";
 function LoginPage() {
 
     return (
-        <div className="login-page">
+        <div className="contrainer-page">
             <LoginComponent />
         </div>
     )

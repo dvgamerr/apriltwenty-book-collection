@@ -28,9 +28,9 @@ function HeaderNavBar() {
                 </Link>
             </div>
             <div className="login">
-                <Link to={`/auth/register`}>
+                <Link to={`/auth/login`}>
                     <div className="nav-auth">
-                        Sign-up
+                        Login
                     </div>
                 </Link>
                 </div>
