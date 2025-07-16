@@ -57,7 +57,6 @@ routerBooks.get("/:bookId", async (req, res) => {
         });
     }
 });
-
 routerBooks.get("/", validateQuery, async(req, res) => {
     //1 access req
     const { name, category, author, page, limit } = req.query;
@@ -123,7 +122,6 @@ routerBooks.get("/", validateQuery, async(req, res) => {
     }
 
 });
-
 routerBooks.post("/", postBookValidation, async (req, res) => {
     //1 access req and body
     const { 
@@ -221,7 +219,6 @@ routerBooks.post("/", postBookValidation, async (req, res) => {
     }
 
 });
-
 routerBooks.put("/:bookId", postBookValidation, async (req, res) => {
     //1 access req
     const bookIdFromClient = req.params.bookId;
@@ -342,7 +339,6 @@ routerBooks.put("/:bookId", postBookValidation, async (req, res) => {
         })
     }
 });
-
 routerBooks.delete("/:bookId", async (req, res) => {
     //1 access request
     const bookIdFromClient = req.params.bookId;
@@ -384,42 +380,4 @@ routerBooks.delete("/:bookId", async (req, res) => {
             })
         }
 });
-
-/*เปลี่ยน method delete เป็นอีกแบบ ช้ากว่า แต่เข้าใจง่ายกว่า
-routerBooks.delete("/:bookId", async (req, res) => {
-    //1 access request
-    const bookIdFromClient = req.params.bookId;
-    const bookIdFromClientInt = parseInt(bookIdFromClient, 10);
-    //2 sql
-    try {
-        const result = await prisma.books.delete({
-            where: { book_id: bookIdFromClientInt },
-            include: {
-                book_authors: { where: { book_id: bookIdFromClientInt }},
-                book_categories: { where: { book_id: bookIdFromClientInt }}
-            }
-    });
-    //3 response
-    console.log(result);
-        return res.status(200).json({
-            "success": true,
-            "message": "Book at id " + bookIdFromClientInt + " is deleted"
-    })
-    } catch (error) {
-        console.error(error)
-        if (error.code == "P2025") {
-            return res.status(404).json({
-                "success": false,
-                "message": "ข้อมูล bookId ไม่ถูกต้อง"
-            })
-        }
-        return res.status(500).json({
-            "success": false,
-            "mesage": "Internal server error. Please try again later."
-        })
-    }
-});
-*/
-
-
 export default routerBooks;

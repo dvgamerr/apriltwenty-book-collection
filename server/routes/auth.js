@@ -48,14 +48,12 @@ routerAuth.post("/register", postUserValidation, async (req, res) => {
             "data": result
         });
     } catch (error) {
-        console.error(error);
         return res.status(500).json({
             "success": false,
             "message": "Internal server error. Please try again later"
         });
     }
 });
-
 routerAuth.post("/login", loginValidation, async (req, res) => {
     //1 access request
     const { username, password } = req.body;

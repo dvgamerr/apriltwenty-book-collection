@@ -185,7 +185,6 @@ routerCustomCollections.delete("/:collectionId", validateId("collectionId"), asy
         });
     }
 });
-
 routerCustomCollections.post("/:collectionId/books", validateId("collectionId"), async (req, res) => {
     const { book_id } = req.body;
     const bookIdInt = parseInt(book_id, 10);
