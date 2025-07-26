@@ -33,9 +33,19 @@ async function init() {
 
     swaggerSetup(app); // เปิดใช้งาน Swagger UI
 
+
+/* ปิดเพื่อ deploy ขึ้น vercel ไม่สามารถใช้ listen ได้
     app.listen(PORT, () => {
         console.log("server is running on port " + PORT);
     });
+*/
+
+    if (import.meta.url === `file://${process.argv[1]}`) {
+        app.listen(4000, () => {
+            console.log('server is running on port 4000')
+        })
+    }
+
 }
 
 init();
