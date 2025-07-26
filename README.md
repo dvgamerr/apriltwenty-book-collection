@@ -29,8 +29,8 @@ npm install swagger-jsdoc swagger-ui-express
 `env
 
 สำหรับใช้งานแบบ production (Supabase)
-DATABASE_URL="postgresql://<user>:<password>@<host>:5432/postgres"
-SECRETKEY="yoursecret_key"
+DATABASE_URL="postgresql://postgres.wppbklkrintqpkgtnsxd:AJJc9xAoeO3PGeIo@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres" 
+SECRET_KEY = lTY7AOgyQ8+ViEIAjijB/3BDlmsoKxQzcaWK9nSMzkCRxMujN3vr6B+d1hAWh/RgXSSoVFvc5aTdIakWq0XQBKr30G6YLLLMWQj2rRj1BpYw54b3WupGzGM98SCYuB4WhcbuNMMj/49GYzHei/15vVVq908WLwTbWj3wGZeB7pjcS4oKYh2P+bOHSPIWWKtN/PdyvPVQYKggoNcvunQr0lLWl8X7U614B4aMQItCc4hcygK+Gtw+SuO+3eSyFbo2d3N5GQ6TPC3qqKhrmqCc/EqSa5lB0Th4yGb5y/vzOv64zZ+UcsFad37EoEpGdYnx1iQ4sRquWyEE0HWPk2LjAQ==
 
 สำหรับทดลองแบบ localhost
 DATABASEURL="postgresql://postgres:<password>@localhost:5432/bookcollection?schema=public"
