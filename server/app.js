@@ -12,41 +12,36 @@ import routerUserProfile from "./routes/user-profile.js";
 import swaggerSetup from "./swagger.js";
 import cors from "cors";
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
+const app = express();
+const PORT = 4000;
 
-async function init() {
-    const app = express();
-    const PORT = 4000;
+app.use(express.json());
+app.use(cors());
+app.use("/books", routerBooks);
+app.use("/authors", routerAuthors);
+app.use("/categories", routerCategories);
+app.use("/auth", routerAuth);
+app.use("/users", routerUsers);
+app.use("/reviews", routerReviews);
+app.use("/userbooks", routerUserBooks);
+app.use("/customcollections", routerCustomCollections);
+app.use("/userprofile", routerUserProfile);
 
-    app.use(express.json());
-    app.use(cors());
-    app.use("/books", routerBooks);
-    app.use("/authors", routerAuthors);
-    app.use("/categories", routerCategories);
-    app.use("/auth", routerAuth);
-    app.use("/users", routerUsers);
-    app.use("/reviews", routerReviews);
-    app.use("/userbooks", routerUserBooks);
-    app.use("/customcollections", routerCustomCollections);
-    app.use("/userprofile", routerUserProfile);
-
-    swaggerSetup(app); // เปิดใช้งาน Swagger UI
+swaggerSetup(app); // เปิดใช้งาน Swagger UI
 
 
 /* ปิดเพื่อ deploy ขึ้น vercel ไม่สามารถใช้ listen ได้
-    app.listen(PORT, () => {
-        console.log("server is running on port " + PORT);
-    });
+app.listen(PORT, () => {
+    console.log("server is running on port " + PORT);
+});
 */
 
-    if (import.meta.url === `file://${process.argv[1]}`) {
-        app.listen(4000, () => {
-            console.log('server is running on port 4000')
-        })
-    }
-
+if (import.meta.url === `file://${process.argv[1]}`) {
+    app.listen(4000, () => {
+        console.log('server is running on port 4000')
+    })
 }
 
-init();
-export default prisma;
+export default app;
