@@ -12,7 +12,13 @@ import routerUserProfile from "./routes/user-profile.js";
 import swaggerSetup from "./swagger.js";
 import cors from "cors";
 
-export const prisma = new PrismaClient();
+let prisma;
+if (global.prisma) {
+  prisma = global.prisma;
+} else {
+  prisma = new PrismaClient();
+  global.prisma = prisma;
+}
 
 const app = express();
 const PORT = 4000;
