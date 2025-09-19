@@ -1,5 +1,4 @@
 import express from "express";
-import { PrismaClient } from "@prisma/client";
 import routerBooks from "./server/routes/books.js";
 import routerAuthors from "./server/routes/authors.js";
 import routerCategories from "./server/routes/categories.js";
@@ -11,14 +10,6 @@ import routerCustomCollections from "./server/routes/custom-collections.js";
 import routerUserProfile from "./server/routes/user-profile.js";
 import swaggerSetup from "./server/swagger.js";
 import cors from "cors";
-
-let prisma;
-if (global.prisma) {
-  prisma = global.prisma;
-} else {
-  prisma = new PrismaClient();
-  global.prisma = prisma;
-}
 
 const app = express();
 const PORT = 4000;
@@ -44,10 +35,8 @@ app.listen(PORT, () => {
 });
 */
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-    app.listen(4000, () => {
-        console.log('server is running on port 4000')
-    })
-}
+app.listen(PORT, () => {
+    console.log('server is running on port 4000')
+})
 
 export default app;
