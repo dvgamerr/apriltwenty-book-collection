@@ -10,7 +10,7 @@
   "license": "ISC",
   "scripts": {
     "start": "node ./server/main.js",
-    "dev:serv": "nodemon ./server/main.js",
+    "dev:serv": "pushd server && nodemon ./main.js && popd server",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
