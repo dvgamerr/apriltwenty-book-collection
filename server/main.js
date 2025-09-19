@@ -10,6 +10,7 @@ import routerCustomCollections from "./routes/custom-collections.js";
 import routerUserProfile from "./routes/user-profile.js";
 import swaggerSetup from "./swagger.js";
 import cors from "cors";
+import path from "path";
 
 const app = express();
 const PORT = 4000;
@@ -25,6 +26,14 @@ app.use("/reviews", routerReviews);
 app.use("/userbooks", routerUserBooks);
 app.use("/customcollections", routerCustomCollections);
 app.use("/userprofile", routerUserProfile);
+
+// Serve static files from the Vite build output
+app.use(express.static("./dist"));
+
+// Catch-all route to serve the index.html for SPA (must be after API routes)
+app.get("/", (req, res) => {
+    res.sendFile(path.join("./dist", "index.html"));
+});
 
 swaggerSetup(app); // เปิดใช้งาน Swagger UI
 

@@ -12,10 +12,10 @@
     "start": "node ./server/main.js",
     "dev:serv": "pushd server && nodemon ./main.js && popd server",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && npm run prisma",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postinstall": "npx prisma generate --no-engine && npx prisma db push"
+    "prisma": "npx prisma generate --no-engine && npx prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^6.12.0",
