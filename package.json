@@ -1,0 +1,53 @@
+{
+  "name": "book-collection",
+  "description": "ขั้นตอนการติดตั้ง 1 สร้าง database ชื่อ book_collection ใช้ sql-statment จากไฟล์ sql-statment.txt ใส่ใน pgadmin เพื่อสร้างตารางและข้อมูลตัวอย่าง 2 clone จาก github https://github.com/AprilTwenty/book-collection.git 3 ติดตั้ง npm ที่ต้องใช้ npm express nodemon bcrypt jsonwebtoken dotenv prisma (pg //ไม่ใช้แล้ว เปลี่ยนมาใช้ prismaORM แต่อาจติดตั้งไว้ ใช้ทดสอบง่ายกว่า)     ติดตั้งตามนี้",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "app.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "dev:serv": "nodemon app.js",
+    "dev:client": "vite",
+    "postinstall": "npx prisma generate --schema=./prisma/schema.prisma",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.12.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemon": "^3.1.10",
+    "pg": "^8.16.3",
+    "prisma": "^6.12.0",
+    "serverless-http": "^3.2.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "axios": "^1.10.0",
+    "dom": "^0.0.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.6.2",
+    "react-slick": "^0.30.3",
+    "route": "^0.2.5",
+    "router": "^2.2.0",
+    "slick-carousel": "^1.8.1",
+    "@eslint/js": "^9.25.0",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.4.1",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "vite": "^6.3.5"
+  }
+}

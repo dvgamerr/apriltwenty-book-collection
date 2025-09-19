@@ -1,15 +1,15 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
-import routerBooks from "./routes/books.js";
-import routerAuthors from "./routes/authors.js";
-import routerCategories from "./routes/categories.js";
-import routerAuth from "./routes/auth.js";
-import routerUsers from "./routes/users.js"
-import routerReviews from "./routes/reviews.js";
-import routerUserBooks from "./routes/user-books.js";
-import routerCustomCollections from "./routes/custom-collections.js";
-import routerUserProfile from "./routes/user-profile.js";
-import swaggerSetup from "./swagger.js";
+import routerBooks from "./server/routes/books.js";
+import routerAuthors from "./server/routes/authors.js";
+import routerCategories from "./server/routes/categories.js";
+import routerAuth from "./server/routes/auth.js";
+import routerUsers from "./server/routes/users.js"
+import routerReviews from "./server/routes/reviews.js";
+import routerUserBooks from "./server/routes/user-books.js";
+import routerCustomCollections from "./server/routes/custom-collections.js";
+import routerUserProfile from "./server/routes/user-profile.js";
+import swaggerSetup from "./server/swagger.js";
 import cors from "cors";
 
 let prisma;
