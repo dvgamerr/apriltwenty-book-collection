@@ -1,7 +1,5 @@
 {
   "version": 2,
-  "installCommand": "npm i",
-  "buildCommand": "npm run build",
   "rewrites": [
     {
       "source": "/(.*)",
