@@ -39,7 +39,7 @@ app.get("/", (req, res) => {
 swaggerSetup(app); // เปิดใช้งาน Swagger UI
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port http://localhost:${PORT}`);
 });
 
 export default app;
