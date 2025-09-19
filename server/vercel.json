@@ -1,10 +1,4 @@
 {
   "version": 2,
-  "installCommand": "npm i",
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
-  ]
+  "installCommand": "npm i"
 }
